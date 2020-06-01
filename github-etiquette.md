@@ -1,4 +1,5 @@
-Object names should be concise and meaningful.
+# Coding Etiquette
+## Object names should be concise and meaningful.
 
 Calling your data data might cause problems if you are doing multiple analyses at once / don’t clean your environment, and you keep using the same object name. But if you need an overwrittable universal object and you don’t need to keep lots of objects from each step of your analysis, sticking with the same object name might be useful.
 Long object names are annoying to type - more letters, higher chance you’ll make a typo.
