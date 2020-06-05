@@ -2,18 +2,18 @@
 title: "MSc Project"
 author: "SOBOYEJO LUKMAN ADEBOYE"
 date: "01/06/2020"
-output: html_document
+output: word_document
+always_allow_html: true
 ---
 
 ```{r global_options, include = FALSE}
-# knitr::opts_knit$set(message=FALSE)
-# tidy.opts=list(width.cutoff=60)) 
+knitr::opts_knit$set(echo= FALSE)
 ```
 
 ## Packages Installed ----
-```{r}
+```{r, warning= FALSE}
 # pkgs <-
-  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape"))
+  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape", "cowplot"))
 # install.packages(pkgs)
 
 library(forecast)   # For the moving avearage timeseries
@@ -26,6 +26,7 @@ library(tidyverse)
 library(pander)
 library(ggthemes)
 library(reshape2)
+library(cowplot)
 ```
 
 ## Theme ----
@@ -179,29 +180,50 @@ rain.ma = ma(rain.ts, order = 12, centre = T)
 unclass.rain <- unclass(rain.ma)
 # dput
 
+
+
 # combined different type of object
 df.rain <- tibble(date, unclass.rain)
+
 
 
 # Data Visualization - ggplot2
 (ppt = ggplot(df.rain,
              aes(x = date, y = unclass.rain)) +
-  geom_line() +
-  geom_smooth(method = "loess",
+    geom_line() +
+    geom_smooth(method = "loess",
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
               se = FALSE,
-              na.rm = TRUE) +
+              na.rm = TRUE,
+              size = 0.5) +
     labs(caption = "Data Source: ARPAe Emilia Romagna",
-    title = "Precipitation",
+    title = "Monthly Precipitation",
        y = "P (mm)",
        x = "Year",
        tag = "") +
         scale_x_date(date_breaks = "5 year",
-               date_minor_breaks = "5 year",
                date_labels = "%Y") +
-  mon.theme())
+    theme_cowplot(9) +
+    annotate(geom = "text",
+           x = as.Date("1988-04-01"),
+           y = 62,
+           label = "???",
+           hjust = 0.5,
+           size = 4) +
+    annotate(geom = "text",
+           x = as.Date("2000-04-01"),
+           y = 90,
+           label = "???",
+           hjust = 0.5,
+           size = 4)
+
+  ) 
+  # annotate(geom = "segment", x = as.Date("1995-04-01"),
+  #          y = 10, xend = as.Date("1990-04-01"),
+  #          yend = 10,
+  #         arrow = arrow(length = unit(2, "mm"))) +
 
 # ggsave(filename = "ppt.png",
 #        dpi = 1200, height = 4,
@@ -213,7 +235,7 @@ df.rain <- tibble(date, unclass.rain)
 
 ## Monthly AET
 ```{r}
-## Data Manipulation for AET
+## Data Manipulation for PET
 # Time Series of AET
 aet.ts <- ts(san.mon.data$aet, frequency = 12, start = c(1971,1))
 # moving average
@@ -221,8 +243,7 @@ aet.ma = ma(aet.ts, order = 12, centre = T)
 # unclass moving average
 unclass.aet <- unclass(aet.ma)
 # combined different type of object using tibble
-df.aet <- tibble(date, unclass.rain)
-head(df.aet)
+df.aet <- tibble(date, unclass.aet)
 
 ## Data Visualization for AET
 (aet = ggplot(df.aet,
@@ -233,13 +254,17 @@ head(df.aet)
               span = 0.3,
               level = 0.95,
               se = FALSE,
-              na.rm = TRUE) +
-  labs(caption = "Data source: ARPAe Emilia Romagna",
-       title = "Actual Evapotranspiration",
+              na.rm = TRUE,
+              size = 0.5) +
+  scale_x_date(date_breaks = "5 year",
+               date_minor_breaks = "5 year",
+               date_labels = "%Y") +
+  labs(title = "Actual Evapotranspiration",
        y = "AET (mm)",
        x = "Year",
        tag = "") +
-    mon.theme())
+  theme_cowplot(9) 
+)
 
 # ggsave(filename = "aet.png",
 #        dpi = 1200, height = 4,
@@ -271,22 +296,39 @@ df.pet <- tibble(date, unclass.rain)
               span = 0.3,
               level = 0.95,
               se = FALSE,
-              na.rm = TRUE) +
-  labs(caption = "Data source: ARPAe Emilia Romagna",
-       title = "Potential Evapotranspiration",
+              na.rm = TRUE,
+              size = 0.5) +
+  scale_x_date(date_breaks = "5 year",
+               date_minor_breaks = "5 year",
+               date_labels = "%Y") +
+  labs(title = "Potential Evapotranspiration",
        y = "PET(mm)",
        x = "Year",
        tag = "") +
-    scale_x_date(date_breaks = "5 year",
-               date_minor_breaks = "5 year",
-               date_labels = "%Y")+
-    mon.theme())
+  theme_cowplot(9) +
+    annotate(geom = "text",
+           x = as.Date("2018-04-01"),
+           y = 70,
+           label = "???",
+           hjust = 0.5,
+           size = 4)
+)
 
 # ggsave(filename = "pet.png",
 #        dpi = 1200, height = 4,
 #        width = 10,
 #        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
 # dev.off()
+```
+## Combine Plt1 ----
+```{r}
+plt1 <- plot_grid(ppt, aet, pet, labels = c('A', 'B', 'C'), label_size = 12,
+                  ncol = 1, align = 'v', axis = 1)
+
+ggsave(filename = "pplt.png",
+       dpi = 1200,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+dev.off()
 ```
 
 ## San Vitale Pu
@@ -311,12 +353,16 @@ df.san.pump <- tibble(date, unclass.san.pump)
               level = 0.95,
               se = FALSE, 
               na.rm = TRUE) +
+      scale_x_date(date_breaks = "5 year",
+               date_minor_breaks = "5 year",
+               date_labels = "%Y") +
     labs(caption = "Data source: Land Reclamation Authority (LRA)",
        title = "San Vitale Pumping",
        y = "Pu(mm)",
        x = "Year", 
        tag = "") +
-  mon.theme())
+    theme_cowplot(9) 
+  )
 # ggsave(filename = "san.pump.png",
 #        dpi = 1200, height = 4,
 #        width = 10,
@@ -341,21 +387,25 @@ df.san.pup <- tibble(date, unclass.san.pup)
 ## Visualization with ggplot
 (san.pup = ggplot(df.san.pup,
                        aes(x = date, y = unclass.san.pup)) +
-  geom_line() +
-  geom_smooth(method = "loess",
+     geom_line() +
+     geom_smooth(method = "loess",
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
               se = FALSE,
               na.rm = TRUE)  +
-  labs(caption = "",
+    scale_x_date(date_breaks = "5 year",
+               date_minor_breaks = "5 year",
+               date_labels = "%Y") +
+    labs(caption = "",
        title = "San Vitale - Pumping / Precipitation",
        y = "Pu/P (mm)",
        x = "Year", 
        tag = "") +
-  mon.theme() +
-  geom_hline(yintercept = 1, linetype = "dashed", color = "red"))
-
+    theme_cowplot(9) +
+    geom_hline(yintercept = 1, linetype = "dashed")
+)
+# 
 # ggsave(filename = "san.pup.png",
 #        dpi = 1200, height = 4,
 #        width = 10,
@@ -378,19 +428,23 @@ df.san.inf <- tibble(date, unclass.san.inf)
 ## Infiltration in San Vitale
 (san.infl = ggplot(df.san.inf,
                       aes(x = date, y = unclass.san.inf)) +
-  geom_line() +
-  geom_smooth(method = "loess",
+      geom_line() +
+      geom_smooth(method = "loess",
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
               se = FALSE,
-              na.rm = TRUE)  +
-  labs(caption = "",
+              na.rm = TRUE) +
+      scale_x_date(date_breaks = "5 year",
+               date_minor_breaks = "5 year",
+               date_labels = "%Y") +
+      labs(caption = "",
        title = "San Vitale - Infiltration (empirical)",
        y = "Infl (mm)",
        x = "Year", 
        tag = "") +
-    mon.theme()) 
+      theme_cowplot(9)
+)
 
 # ggsave(filename = "san.infl.png",
 #        dpi = 1200, height = 4,
@@ -414,21 +468,25 @@ df.san.ds <- tibble(date, unclass.san.ds)
 ## Data Visualization with ggplot2
 (san.ds = ggplot(df.san.ds,
                       aes(x = date, y = unclass.san.ds)) +
-  geom_line() +
-  geom_smooth(aes(x = date, y = unclass.san.ds),
+      geom_line() +
+      geom_smooth(aes(x = date, y = unclass.san.ds),
               method = "loess",
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
               se = FALSE,
-              na.rm = TRUE)  +
-  labs(caption = "",
+              na.rm = TRUE) +
+      scale_x_date(date_breaks = "5 year",
+               date_minor_breaks = "5 year",
+               date_labels = "%Y") +
+      labs(caption = "",
        title = "San Vitale Change in Water Storage (empirical)",
        y = "dS (mm)",
        x = "Year", 
        tag = "") +
-  mon.theme() +
-    geom_hline(yintercept = 0, linetype = "dashed", color = "red"))
+      theme_cowplot(9) +
+       geom_hline(yintercept = 0, linetype = "dashed", color = "red")
+)
 
 # ggsave(filename = "san.ds.png",
 #        dpi = 1200, height = 4,
@@ -453,20 +511,24 @@ df.ras.pump <- tibble(date, unclass.ras.pump)
 
 ## pumping in san vitale basin 
 (san.pump = ggplot(df.ras.pump,
-  aes(x = date, y = unclass.ras.pump)) +
-    geom_line() +
-    geom_smooth(method = "loess",
+                   aes(x = date, y = unclass.ras.pump)) +
+      geom_line() +
+       geom_smooth(method = "loess",
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
               se = FALSE, 
               na.rm = TRUE) +
-  labs(caption = "Data Source: Land Reclamation Authority (LRA)",
-       title = "Rasponi Pumping",
-       y = "Pu(mm)",
-       x = "Year", 
+       scale_x_date(date_breaks = "5 year",
+               date_minor_breaks = "5 year",
+               date_labels = "%Y") +
+       labs(caption = "Data Source: Land Reclamation Authority (LRA)",
+            title = "Rasponi Pumping",
+            y = "Pu(mm)",
+            x = "Year", 
        tag = "") +
-    mon.theme()) 
+       mon.theme()
+) 
 
 # ggsave(filename = "ras.pump.png",
 #        dpi = 1200, height = 4,
@@ -921,7 +983,7 @@ season.rain$Month = factor(season.rain$Month, levels = month.abb)
 # Visualization with ggplot
 (ppt = ggplot(season.rain, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -977,7 +1039,7 @@ season.pet$Month = factor(season.pet$Month, levels = month.abb)
 # Visualization with ggplot
 (pet = ggplot(season.pet, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1033,7 +1095,7 @@ season.aet$Month = factor(season.aet$Month, levels = month.abb)
 # Visualization with ggplot
 (aet = ggplot(season.aet, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1090,7 +1152,7 @@ season.pu$Month = factor(season.pu$Month, levels = month.abb)
 # Visualization with ggplot
 (san_pu <- ggplot(season.pu, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1146,7 +1208,7 @@ season.pup$Month = factor(season.pup$Month, levels = month.abb)
 # Visualization with ggplot
 (san_pup = ggplot(season.pup, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1204,7 +1266,7 @@ season.infl$Month = factor(season.infl$Month, levels = month.abb)
 # Visualization with ggplot
 (san_infl = ggplot(season.infl, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1261,7 +1323,7 @@ season.dS$Month = factor(season.dS$Month, levels = month.abb)
 # Visualization with ggplot
 (san_dS = ggplot(season.dS, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1317,7 +1379,7 @@ season.pu$Month = factor(season.pu$Month, levels = month.abb)
 # Visualization with ggplot
 (ras_pu <- ggplot(season.pu, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1373,7 +1435,7 @@ season.pup$Month = factor(season.pup$Month, levels = month.abb)
 # Visualization with ggplot
 (ras_pup = ggplot(season.pup, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1430,7 +1492,7 @@ season.infl$Month = factor(season.infl$Month, levels = month.abb)
 # Visualization with ggplot
 (ras_infl = ggplot(season.infl, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1487,7 +1549,7 @@ season.dS$Month = factor(season.dS$Month, levels = month.abb)
 # Visualization with ggplot
 (ras_dS = ggplot(season.dS, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1543,7 +1605,7 @@ season.pu$Month = factor(season.pu$Month, levels = month.abb)
 # Visualization with ggplot
 (quin_pu <- ggplot(season.pu, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1599,7 +1661,7 @@ season.pup$Month = factor(season.pup$Month, levels = month.abb)
 # Visualization with ggplot
 (quin_pup = ggplot(season.pup, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1656,7 +1718,7 @@ season.infl$Month = factor(season.infl$Month, levels = month.abb)
 # Visualization with ggplot
 (quin_infl = ggplot(season.infl, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -1713,7 +1775,7 @@ season.dS$Month = factor(season.dS$Month, levels = month.abb)
 # Visualization with ggplot
 (quin_dS = ggplot(season.dS, aes(x = Month, y = value,
                       fill = Month, 
-                      class = mon_class)) +
+                      class = Month)) +
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
@@ -2081,7 +2143,7 @@ df <- cbind.data.frame(Drought_Index, Drought_neg, Drought_pos)
 ```
 
 ## Subsidence ----
-```{r}
+```{r,warning= FALSE}
 ## Columns of Subsidence
  Q <- subsidence[,2]
  R <- subsidence[,3]
@@ -2093,49 +2155,44 @@ df <- cbind.data.frame(Drought_Index, Drought_neg, Drought_pos)
 year <- subsidence$Year
 ## Combined into data frame
  df <- cbind.data.frame(Q, R, S, year)
- head(df)
-(p1 = ggplot(df)+ 
+
+ 
+(p1 <- ggplot(df) + 
       geom_line(aes(year, 
                     Q, 
                     color = "Quinto_basin"), 
-                    size = 3 ) +
+                    size = 1) +
       geom_line(aes(year, 
                     S, 
                     color = "S.Vitale_basin"), 
-                    size = 3 ) +
+                    size = 1) +
   geom_line(aes(year, 
                 R, 
                 color = "Rasponi_basin"), 
-                size = 3 )+
+                size = 1) +
   labs(x = "Year", 
        y = "subsidence", 
-       title = "Cummulative Subsidence; 1972 to 2016") +
+       title = "Cummulative Subsidence (1972 to 2016)",
        values=c("Quinto_basin" = "307FE2", 
                               "S.Vitale_basin" ="steelblue",
                               "Rasponi_basin" = "#FAAB18")) +
-  theme(axis.title = element_text(face = "bold", 
-                                  size = 12),
-                panel.border = element_rect(size = 1.5),
-                axis.text = element_text(face = "bold", 
-                                         size = 12),
-                panel.grid = element_blank(),
-                plot.title = element_text(hjust=0.5, 
-                                          size = 16),
+    theme(axis.text = element_text(face = "plain",
+                                   size = 8),
+          plot.title = element_text(face = "plain", size = 16),
                 legend.justification=c(0.8,0.2),
                 legend.position=c(0.95,0.1)) +
   annotate(geom = "segment",
-           x = 1979, 
+           x = 1985, 
            xend = 1974, 
            y = 200, 
            yend = 200,
            arrow = arrow(type = "closed",
-           length = unit(0.10, "inches"))) +
-  geom_label(aes(x = 1980, y = 200, 
+                         length = unit(0.130, "inches"))) +
+  geom_label(aes(x = 1987, y = 200, 
                  label = "Anthropogenic"),hjust = 0.5,
                  vjust = 0.5,  
                  fill = "white", label.size = NA,
-                size = 4)
-p1
+                size = 4))
 
 ```
 
