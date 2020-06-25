@@ -221,38 +221,38 @@ Mycolours <- c("dodgerblue3", "darkorange2", "hotpink2", "magenta3", "red", "sky
       axis.text.x = element_text(),
       axis.title.x = element_text(),
       axis.line.x = element_line()
-    ) 
-    # annotate(
-    #   geom = "curve", x = as.Date("2000-04-01"), y = 95, xend = as.Date("1998-04-01"), yend = 80,
-    #   curvature = 0.5, arrow = arrow(length = unit(2, "mm"))) +
-    # annotate(
-    #   geom = "text",
-    #   x = as.Date("2001-04-01"),
-    #   y = 95,
-    #   label = "maximum rainfall",
-    #   hjust = "left",
-    #   color = "#BB2D05",
-    #   fill = "white"
-    # ) +
-    #     annotate(
-    #   geom = "curve", x = as.Date("1993-04-01"), y = 30, xend = as.Date("1988-04-01"), yend = 35,
-    #   curvature = -0.3, arrow = arrow(length = unit(2, "mm"))) +
-    # annotate(
-    #   geom = "text",
-    #   x = as.Date("1994-04-01"),
-    #   y = 35,
-    #   label = "mininmum rainfall",
-    #   hjust = "left",
-    #   color = "#BB2D05"
-    # ) 
+    ) +
+    annotate(
+      geom = "curve", x = as.Date("2000-04-01"), y = 95, xend = as.Date("1998-04-01"), yend = 80,
+      curvature = 0.5, arrow = arrow(length = unit(2, "mm"))) +
+    annotate(
+      geom = "text",
+      x = as.Date("2001-04-01"),
+      y = 95,
+      label = "maximum rainfall",
+      hjust = "left",
+      color = "#BB2D05",
+      fill = "white"
+    ) +
+        annotate(
+      geom = "curve", x = as.Date("1993-04-01"), y = 30, xend = as.Date("1988-04-01"), yend = 35,
+      curvature = -0.3, arrow = arrow(length = unit(2, "mm"))) +
+    annotate(
+      geom = "text",
+      x = as.Date("1994-04-01"),
+      y = 35,
+      label = "mininmum rainfall",
+      hjust = "left",
+      color = "#BB2D05"
+    )
   )
 
 
-ggsave(filename = "ppt.png",
-       dpi = 1200, height = 4,
-       width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "ppt.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 
 ```
 
