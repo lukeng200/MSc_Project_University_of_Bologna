@@ -73,7 +73,7 @@ wat_bal_ras <- read.csv("D:/Bologna Project/Land_Reclamation_Excel_Data/Rasponi.
 wat_bal_quin <- read.csv("D:/Bologna Project/Land_Reclamation_Excel_Data/Fosso_Ghiaia.R/Quinto Basin/wat_bal_quin.csv")
 
 ## Water Budget
-water_budget <- read.csv("D:/Bologna Project/Land_Reclamation_Excel_Data/dat.csv")
+#water_budget <- read.csv("D:/Bologna Project/Land_Reclamation_Excel_Data/dat.csv")
 
 
 ## Drought Values
@@ -81,7 +81,7 @@ spi.data <- read.csv("D:/Bologna Project/Land_Reclamation_Excel_Data/Code/Drough
 Drought_Index <- read.csv("D:/Bologna Project/Land_Reclamation_Excel_Data/Code/Drought_Index.csv")
 
 ## Subsidence
-subsidence <- read.delim("D:/Bologna Project/Land_Reclamation_Excel_Data/subsidence.txt")
+# subsidence <- read.delim("D:/Bologna Project/Land_Reclamation_Excel_Data/subsidence.txt")
 
 # kable()
 # pander()
@@ -95,8 +95,9 @@ link to learn more about ggthemes
 
 ## Monthly Prec
 ```{r,warning= FALSE}
+
 ## Date Conversion to POSXCIT
-newyear = parse_date_time(san.mon.data[,1], "by")
+newyear = parse_date_time(san.mon.data[, 1], "by")
 date = as.Date.POSIXct(newyear)
 # # change to date format
 # mydate.ch <- format(date, "%b %Y")
@@ -105,7 +106,9 @@ date = as.Date.POSIXct(newyear)
 
 # Data Manipulation for P
 # Time Series of precipitation
-rain.ts <- ts(san.mon.data$p, frequency = 12, start = c(1971,1))
+rain.ts <- ts(san.mon.data$p,
+              frequency = 12,
+              start = c(1971, 1))
 # moving average
 rain.ma = ma(rain.ts, order = 12, centre = T)
 # unclass rain moving average
@@ -117,71 +120,92 @@ unclass.rain <- unclass(rain.ma)
 # combined different type of object
 df.rain <- tibble(date, unclass.rain)
 
-Mycolours <- c("dodgerblue3", "darkorange2", "hotpink2", "magenta3", "red", "skyblue1", "gold", "grey57", "tomato4", "lightsalmon1", "goldenrod2", "lemonchiffon2")
+Mycolours <-
+  c(
+    "dodgerblue3",
+    "darkorange2",
+    "hotpink2",
+    "magenta3",
+    "red",
+    "skyblue1",
+    "gold",
+    "grey57",
+    "tomato4",
+    "lightsalmon1",
+    "goldenrod2",
+    "lemonchiffon2"
+  )
 
 # Data Visualization - ggplot2
-(ppt = ggplot(df.rain,
-             aes(x = date, y = unclass.rain)) +
-      geom_line() +
-      geom_smooth(method = "loess",
-              formula = y ~ x,
-              span = 0.3,
-              level = 0.95,
-              se = TRUE,
-              na.rm = TRUE,
-              size = 0.5,) +
-     labs(caption = "Data Source: ARPAe Emilia Romagna",
-     title = "Monthly Rainfall",
-     subtitle = "Rainfall (mm/month) representing the three coastal basins",
-       y = "P (mm/month)",
-       x = "Time",
-       tag = "A") +
+(
+  ppt = ggplot(df.rain,
+               aes(x = date, y = unclass.rain)) +
+    geom_line() +
+    geom_smooth(
+      method = "loess",
+      formula = y ~ x,
+      span = 0.3,
+      level = 0.95,
+      se = FALSE,
+      na.rm = TRUE
+    ) +
+    labs(
+      caption = "Data Source: ARPAe Emilia Romagna",
+      title = "Monthly Rainfall",
+      subtitle = "Rainfall (mm/month) representing the three coastal basins",
+      y = "P (mm/month)",
+      x = "Time",
+      tag = "a"
+    ) +
     scale_x_date(date_breaks = "5 year",
-               date_labels = "%Y") +
-    theme_cowplot() +
-    theme(
-      axis.ticks.y = element_line(),
-      axis.text.y = element_text(),
-      axis.title.y = element_text(),
-      axis.line.y = element_line(),
-      axis.ticks.x = element_line(),
-      axis.text.x = element_text(),
-      axis.title.x = element_text(),
-      axis.line.x = element_line()
-    ) 
+                 date_labels = "%Y") +
+    theme_cowplot() 
     # annotate(
-    #   geom = "curve", x = as.Date("2000-04-01"), y = 95, xend = as.Date("1998-04-01"), yend = 80,
-    #   curvature = 0.5, arrow = arrow(length = unit(2, "mm"))) +
+    #   geom = "curve",
+    #   x = as.Date("2000-04-01"),
+    #   y = 95,
+    #   xend = as.Date("1998-04-01"),
+    #   yend = 80,
+    #   curvature = 0.5,
+    #   arrow = arrow(length = unit(2, "mm"))
+    # ) +
     # annotate(
     #   geom = "text",
     #   x = as.Date("2001-04-01"),
     #   y = 95,
     #   label = "maximum rainfall",
     #   hjust = "left",
-    #   color = "#BB2D05",
-    #   fill = "white"
+    #   size = 5
     # ) +
-    #     annotate(
-    #   geom = "curve", x = as.Date("1993-04-01"), y = 30, xend = as.Date("1988-04-01"), yend = 35,
-    #   curvature = -0.3, arrow = arrow(length = unit(2, "mm"))) +
+    # annotate(
+    #   geom = "curve",
+    #   x = as.Date("1993-04-01"),
+    #   y = 30,
+    #   xend = as.Date("1988-04-01"),
+    #   yend = 35,
+    #   curvature = -0.3,
+    #   arrow = arrow(length = unit(2, "mm"))
+    # ) +
     # annotate(
     #   geom = "text",
     #   x = as.Date("1994-04-01"),
     #   y = 35,
     #   label = "mininmum rainfall",
     #   hjust = "left",
-    #   color = "#BB2D05"
+    #   size = 5
     # )
-  )
+)
 
 
-ggsave(filename = "ppt.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "ppt.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
 
 ```
+
+
 
 ## Monthly AET
 ```{r}
@@ -203,9 +227,8 @@ df.aet <- tibble(date, unclass.aet)
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
-              se = TRUE,
-              na.rm = TRUE,
-              size = 0.5) +
+              se = FALSE,
+              na.rm = TRUE) +
   scale_x_date(date_breaks = "5 year",
                date_minor_breaks = "5 year",
                date_labels = "%Y") +
@@ -213,7 +236,7 @@ df.aet <- tibble(date, unclass.aet)
        subtitle = "Obtained using Thornthwaite Mather procedure (1957)",
        y = "AET (mm/month)",
        x = "Time",
-       tag = "B") +
+       tag = "b") +
     theme_cowplot() +
     theme(
       axis.ticks.y = element_line(),
@@ -232,15 +255,16 @@ df.aet <- tibble(date, unclass.aet)
     #   label = "...depends on the level of soil \n moisture content and rainfall",
     #   hjust = "left",
     #   color = "#BB2D05"
-    # ) 
+    # )
   )
 
-ggsave(filename = "aet.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "aet.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
 ```
+
 
 ## Monthly PET
 ```{r}
@@ -263,9 +287,8 @@ df.pet <- tibble(date, unclass.rain)
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
-              se = TRUE,
-              na.rm = TRUE,
-              size = 0.5) +
+              se = FALSE,
+              na.rm = TRUE) +
   scale_x_date(date_breaks = "5 year",
                date_minor_breaks = "5 year",
                date_labels = "%Y") +
@@ -273,7 +296,7 @@ df.pet <- tibble(date, unclass.rain)
        subtitle = "Obtained using Thornthwaite method (1948)",
        y = "PET(mm/month)",
        x = "Time",
-       tag = "C") +
+       tag = "c") +
     theme_cowplot() +
     theme(
       axis.ticks.y = element_line(),
@@ -295,33 +318,37 @@ df.pet <- tibble(date, unclass.rain)
     # )
   )
 
-ggsave(filename = "pet.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "pet.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
 ```
+
+
 ## Combine Plt1 ----
 ```{r}
-# (plt1 <- plot_grid(
-#   ppt,
-#   aet,
-#   pet,
-#   labels = c('AUTO'),
-#   label_size = 12,
-#   ncol = 1,
-#   align = 'h',
-#   axis = 1)
-# )
+library(patchwork)
 
-# library(patchwork)
-ppt/aet/pet + plot_layout(guides = 'collect')
+(plt1 <- plot_grid(
+  ppt,
+  aet,
+  pet,
+  labels = c(''),
+  label_size = 12,
+  ncol = 1,
+  align = 'h',
+  axis = 1)
+)
 
-# ggsave(filename = "plt1.png",
-#        dpi = 1200, height =12,
-#        width = 11.5,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+# 
+# x = ppt/aet/pet + plot_layout(guides = 'collect')
+
+ggsave(filename = "plt.png",
+       dpi = 1200, height =10,
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## San Vitale Pu
@@ -337,14 +364,14 @@ df.san.pump <- tibble(date, unclass.san.pump)
 
 
 ## pumping in san vitale basin 
-(san.pump = ggplot(df.san.pump,
+san.pump = ggplot(df.san.pump,
   aes(x = date, y = unclass.san.pump)) +
     geom_line() +
     geom_smooth(method = "loess",
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
-              se = TRUE, 
+              se = FALSE, 
               na.rm = TRUE) +
       scale_x_date(date_breaks = "5 year",
                date_minor_breaks = "5 year",
@@ -353,7 +380,7 @@ df.san.pump <- tibble(date, unclass.san.pump)
        title = "San Vitale Basin Pumping",
        y = "Pu (mm/month)",
        x = "Time", 
-       tag = "A") +
+       tag = "") +
     theme_cowplot() +
     theme(
       axis.ticks.y = element_line(),
@@ -363,37 +390,61 @@ df.san.pump <- tibble(date, unclass.san.pump)
       axis.ticks.x = element_line(),
       axis.text.x = element_text(),
       axis.title.x = element_text(),
-      axis.line.x = element_line()
-    ) 
-    # annotate(
-    #   "segment",
-    #   x = as.Date("1971-01-01"),
-    #   xend = as.Date("2018-12-01"),
-    #   y = 70,
-    #   yend = 70) +
-    # annotate(
-    #   geom = "point",
-    #   x = c(
-    #     as.Date("1971-01-01"),
-    #     as.Date("1983-01-01"),
-    #     as.Date("1983-01-01"),
-    #     as.Date("1993-01-01"),
-    #     as.Date("2003-01-01"),
-    #     as.Date("2018-12-01")), 
-    #   y = c(70, 70, 70, 70, 70, 70), size = 3) +
-    # annotate(geom = "text", x = c(
-    #     as.Date("1977-01-01"),
-    #     as.Date("1988-01-01"),
-    #     as.Date("1998-01-01"),
-    #     as.Date("2010-01-01")), y = c(74, 74, 74, 74), 
-    #     label = c("severe subsidence, coastal extremes [..]", "prolonged dryness", "rainfall rises", "unexpected decline ????"), 
-    #     hjust = c("middle", "middle", "middle", "middle"),
-    #     colour = "#BB2D05")
-  )
+      axis.line.x = element_line())
+    
+#      annotate(
+#       geom = "curve",
+#       x = as.Date("1978-04-01"),
+#       y = 45,
+#       xend = as.Date("1973-04-01"),
+#       yend = 55,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#    geom_label(
+#        x = as.Date("1981-04-01"),
+#       y = 60,
+#       label = "1971 to 1980 \n high water head",
+#       hjust = "right",
+#       size = 5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = as.Date("1988-04-01"),
+#       y = 18,
+#       xend = as.Date("1991-04-01"),
+#       yend = 40,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = as.Date("1995-04-01"),
+#       y = 48,
+#       label = "1983 and 1993 \ndrought",
+#       hjust = "middle",
+#       size = 5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = as.Date("2018-04-01"),
+#       y = 18,
+#       xend = as.Date("2016-04-01"),
+#       yend = 40,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = as.Date("2015-04-01"),
+#       y = 48,
+#       label = "2000 and 2018 \nunexpected drop",
+#       hjust = "middle",
+#       size = 5
+#     )
+#   )
 ggsave(filename = "san.pump.png",
        dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
 
 ```
@@ -412,7 +463,7 @@ df.san.pup <- tibble(date, unclass.san.pup)
 
 
 ## Visualization with ggplot
-(san.pup = ggplot(df.san.pup,
+san.pup = ggplot(df.san.pup,
                        aes(x = date, y = unclass.san.pup)) +
      geom_line() +
      geom_smooth(method = "loess",
@@ -438,45 +489,54 @@ df.san.pup <- tibble(date, unclass.san.pup)
       axis.ticks.x = element_line(),
       axis.text.x = element_text(),
       axis.title.x = element_text(),
-      axis.line.x = element_line()
-    ) 
-    # annotate(
-    #   geom = "curve", x = as.Date("1985-04-01"), y =2.5, xend = as.Date("1982-04-01"), yend = 1.6,
-    #   curvature = 0.3, arrow = arrow(length = unit(2, "mm"))) +
-    # annotate(
-    #   geom = "text",
-    #   x = as.Date("1985-04-01"),
-    #   y = 2.5,
-    #   label = "Severe subsidence",
-    #   hjust = "left",
-    #   color = "#BB2D05"
-    # ) +
-    #     annotate(
-    #   geom = "curve", x = as.Date("2005-04-01"), y = 2.5, xend = as.Date("2003-04-01"), yend = 1.6,
-    #   curvature = 0.3, arrow = arrow(length = unit(2, "mm"))) +
-    # annotate(
-    #   geom = "text",
-    #   x = as.Date("2005-04-01"),
-    #   y = 2.5,
-    #   label = "Rainfall at maximum",
-    #   hjust = "left",
-    #   color = "#BB2D05"
-    # ) 
-  )
+      axis.line.x = element_line())
+#     annotate(
+#       geom = "curve",
+#       x = as.Date("1985-04-01"),
+#       y = 2.5,
+#       xend = as.Date("1982-04-01"),
+#       yend = 1.6,
+#       curvature = 0.3,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = as.Date("1985-04-01"),
+#       y = 2.6,
+#       label = "high water head",
+#       hjust = "middle",
+#       size = 5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = as.Date("2005-04-01"),
+#       y = 2.5,
+#       xend = as.Date("2003-04-01"),
+#       yend = 1.6,
+#       curvature = 0.3,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = as.Date("2005-04-01"),
+#       y = 2.6,
+#       label = "rainfall maximum peak",
+#       hjust = "middle",
+#       size = 5
+#     )
+# )
 
-ggsave(filename = "san.pup.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "san.pup.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
 ```
 
 ## Combined plt2 ----
 ```{r, warning=FALSE}
 (plt2 <- plot_grid(
-  ppt,
+  ras.pump,
   san.pump,
-  san.pup,
+  quin.pump,
   labels = c('AUTO'),
   label_size = 12,
   ncol = 1,
@@ -484,11 +544,11 @@ dev.off()
   axis = 1)
 )
 
-# ggsave(filename = "plt2.png",
-#        dpi = 1200, height =12,
-#        width = 11.5,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "plt2.png",
+       dpi = 1200, height =12,
+       width = 11.5,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## San Vitale Infl
@@ -504,7 +564,7 @@ unclass.san.inf <- unclass(san.inf.ma)
 df.san.inf <- tibble(date, unclass.san.inf)
 
 ## Infiltration in San Vitale
-(san.infl = ggplot(df.san.inf,
+san.infl = ggplot(df.san.inf,
                       aes(x = date, y = unclass.san.inf)) +
       geom_line() +
       geom_smooth(method = "loess",
@@ -532,13 +592,13 @@ df.san.inf <- tibble(date, unclass.san.inf)
       axis.text.x = element_text(),
       axis.title.x = element_text(),
       axis.line.x = element_line())
-)
 
-ggsave(filename = "san.infl.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+
+# ggsave(filename = "san.infl.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 ## San Vitale dS
@@ -607,14 +667,14 @@ df.ras.pump <- tibble(date, unclass.ras.pump)
 
 
 ## pumping in san vitale basin 
-(ras.pump = ggplot(df.ras.pump,
+ras.pump = ggplot(df.ras.pump,
                    aes(x = date, y = unclass.ras.pump)) +
       geom_line() +
        geom_smooth(method = "loess",
               formula = y ~ x,
               span = 0.3,
               level = 0.95,
-              se = TRUE, 
+              se = FALSE, 
               na.rm = TRUE) +
        scale_x_date(date_breaks = "5 year",
                date_minor_breaks = "5 year",
@@ -623,7 +683,7 @@ df.ras.pump <- tibble(date, unclass.ras.pump)
             title = "Rasponi pumping",
             y = "Pu (mm/month)",
             x = "Time", 
-       tag = "A") +
+       tag = "") +
     theme(
       axis.ticks.y = element_line(),
       axis.text.y = element_text(),
@@ -634,38 +694,46 @@ df.ras.pump <- tibble(date, unclass.ras.pump)
       axis.title.x = element_text(),
       axis.line.x = element_line()
     ) +
-  theme_cowplot()
-    # annotate(
-    #   "segment",
-    #   x = as.Date("1971-01-01"),
-    #   xend = as.Date("2018-12-01"),
-    #   y = 50,
-    #   yend = 50) +
-    # annotate(
-    #   geom = "point",
-    #   x = c(
-    #     as.Date("1971-01-01"),
-    #     as.Date("1983-01-01"),
-    #     as.Date("1983-01-01"),
-    #     as.Date("1993-01-01"),
-    #     as.Date("2003-01-01"),
-    #     as.Date("2018-12-01")), 
-    #   y = c(50, 50, 50, 50, 50, 50), size = 3) +
-    # annotate(geom = "text", x = c(
-    #     as.Date("1977-01-01"),
-    #     as.Date("1988-01-01"),
-    #     as.Date("1998-01-01"),
-    #     as.Date("2010-01-01")), y = c(54, 54, 54, 54), 
-    #     label = c("severe subsidence, coastal extremes [..]", "prolonged dryness", "rainfall rises", "starts to increase"), 
-    #     hjust = c("middle", "middle", "middle", "middle"),
-    #     colour = "#BB2D05")
-  )
-
-ggsave(filename = "ras.pump.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+  theme_cowplot() 
+#      annotate(
+#       geom = "curve",
+#       x = as.Date("1978-04-01"),
+#       y = 25,
+#       xend = as.Date("1975-04-01"),
+#       yend = 35,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#    geom_label(
+#        x = as.Date("1981-04-01"),
+#       y = 40,
+#       label = "1971 to 1980 \n high water head",
+#       hjust = "right",
+#       size = 5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = as.Date("1988-04-01"),
+#       y = 10,
+#       xend = as.Date("1991-04-01"),
+#       yend = 35,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = as.Date("1995-04-01"),
+#       y = 40,
+#       label = "1983 and 1993 \ndrought",
+#       hjust = "middle",
+#       size = 5
+#     ) 
+#   )
+# 
+# ggsave(filename = "ras.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
   
 ```
 
@@ -705,6 +773,7 @@ df.ras.pup <- tibble(date, unclass.ras.pup)
       date_minor_breaks = "5 year",
       date_labels = "%Y"
     ) +
+    theme_cowplot() +
     theme(
       axis.ticks.y = element_line(),
       axis.text.y = element_text(),
@@ -713,36 +782,47 @@ df.ras.pup <- tibble(date, unclass.ras.pup)
       axis.ticks.x = element_line(),
       axis.text.x = element_text(),
       axis.title.x = element_text(),
-      axis.line.x = element_line()) +
-    theme_cowplot() 
-    # annotate(
-    #   geom = "curve", x = as.Date("1985-04-01"), y =1.0, xend = as.Date("1982-04-01"), yend = 0.7,
-    #   curvature = 0.3, arrow = arrow(length = unit(2, "mm"))) +
-    # annotate(
-    #   geom = "text",
-    #   x = as.Date("1985-04-01"),
-    #   y = 1.0,
-    #   label = "Severe subsidence",
-    #   hjust = "left",
-    #   color = "#BB2D05"
-    # ) +
-    #     annotate(
-    #   geom = "curve", x = as.Date("2005-04-01"), y = 1.0, xend = as.Date("2003-04-01"), yend = 0.7,
-    #   curvature = 0.3, arrow = arrow(length = unit(2, "mm"))) +
-    # annotate(
-    #   geom = "text",
-    #   x = as.Date("2005-04-01"),
-    #   y = 1.0,
-    #   label = "Rainfall at maximum",
-    #   hjust = "left",
-    #   color = "#BB2D05"
-    # ) 
-  )
+      axis.line.x = element_line()
+    ) +
+    annotate(
+      geom = "curve",
+      x = as.Date("1985-04-01"),
+      y = 1.0,
+      xend = as.Date("1982-04-01"),
+      yend = 0.7,
+      curvature = 0.3,
+      arrow = arrow(length = unit(2, "mm"))
+    ) +
+    geom_label(
+      x = as.Date("1985-04-01"),
+      y = 1.0,
+      label = "high water head",
+      hjust = "middle",
+      size = 5
+    ) +
+    annotate(
+      geom = "curve",
+      x = as.Date("2005-04-01"),
+      y = 1.0,
+      xend = as.Date("2003-04-01"),
+      yend = 0.7,
+      curvature = 0.7,
+      arrow = arrow(length = unit(2, "mm"))
+    ) +
+    geom_label(
+      x = as.Date("2003-04-01"),
+      y = 1.0,
+      label = "rainfall at maximum peak",
+      hjust = "middle",
+      size = 5
+    )
+)
+
 
 ggsave(filename = "ras.pup.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       dpi = 1200,  height = 4,
+        width = 12,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
 ```
 
@@ -874,6 +954,8 @@ ggsave(filename = "ras.ds.png",
 dev.off()
 ```
 
+
+
 ## Quinto Pu
 ```{r}
 ## Data Manipulation
@@ -886,20 +968,20 @@ unclass.quin.pump <- unclass(quin.pump.ma)
 df.quin.pump <- tibble(date, unclass.quin.pump)
 
 ## pumping 
-(quin.pump = ggplot(df.quin.pump,
+quin.pump = ggplot(df.quin.pump,
                       aes(x = date, y = unclass.quin.pump)) +
   geom_line() +
     geom_smooth(method = "loess",
                 formula = y ~ x,
                 span = 0.3,
                 level = 0.95,
-                se = TRUE,
+                se = FALSE,
                 na.rm = TRUE)  +
   labs(caption = "Data Source: Land Reclamation Consortium Ravenna",
        title = "Quinto Pumping",
        y = "Pu (mm/month)",
        x = "Time", 
-       tag = "A") +
+       tag = "") +
        scale_x_date(date_breaks = "5 year",
                date_minor_breaks = "5 year",
                date_labels = "%Y") +
@@ -914,35 +996,45 @@ df.quin.pump <- tibble(date, unclass.quin.pump)
       axis.title.x = element_text(),
       axis.line.x = element_line()
     ) 
-    # annotate(
-    #   "segment",
-    #   x = as.Date("1971-01-01"),
-    #   xend = as.Date("2018-12-01"),
-    #   y = 40,
-    #   yend = 40) +
-    # annotate(
-    #   geom = "point",
-    #   x = c(
-    #     as.Date("1971-01-01"),
-    #     as.Date("1983-01-01"),
-    #     as.Date("1983-01-01"),
-    #     as.Date("1993-01-01"),
-    #     as.Date("2003-01-01"),
-    #     as.Date("2018-12-01")),
-    #   y = c(40, 40, 40, 40, 40, 40), size = 3) +
-    # annotate(geom = "text", x = c(
-    #     as.Date("1977-01-01"),
-    #     as.Date("1988-01-01"),
-    #     as.Date("1998-01-01"),
-    #     as.Date("2010-01-01")), y = c(42, 42, 42, 42),
-    #     label = c("severe subsidence, coastal extremes [..]", "prolonged dryness", "rainfall rises", "starts to increase"),
-    #     hjust = c("middle", "middle", "middle", "middle"), colour = "#BB2D05")
-  )
-ggsave(filename = "quin.pump.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+#      annotate(
+#       geom = "curve",
+#       x = as.Date("1978-04-01"),
+#       y = 20,
+#       xend = as.Date("1975-04-01"),
+#       yend = 30,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#    geom_label(
+#        x = as.Date("1971-04-01"),
+#       y = 35,
+#       label = "1971 to 1980 \n high water head",
+#       hjust = "left",
+#       size = 5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = as.Date("1988-04-01"),
+#       y = 10,
+#       xend = as.Date("1991-04-01"),
+#       yend = 25,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#    geom_label(
+#        x = as.Date("1986-04-01"),
+#       y = 30,
+#       label = "1983 and 1993 \ndrought",
+#       hjust = "left",
+#       size = 5
+#     )
+#   )
+# 
+# ggsave(filename = "quin.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
 ```
 
 ## Quinto Pu/P
@@ -973,6 +1065,7 @@ df.quin.pup <- tibble(date, unclass.quin.pup)
        scale_x_date(date_breaks = "5 year",
                date_minor_breaks = "5 year",
                date_labels = "%Y")+
+    theme_cowplot() +
     theme(
       axis.ticks.y = element_line(),
       axis.text.y = element_text(),
@@ -981,48 +1074,55 @@ df.quin.pup <- tibble(date, unclass.quin.pup)
       axis.ticks.x = element_line(),
       axis.text.x = element_text(),
       axis.title.x = element_text(),
-      axis.line.x = element_line()) +
-    theme_cowplot() 
-    # annotate(
-    #   geom = "curve", x = as.Date("1985-04-01"), y =1.0, xend = as.Date("1982-04-01"), yend = 0.7,
-    #   curvature = 0.3, arrow = arrow(length = unit(2, "mm"))) +
-    # annotate(
-    #   geom = "text",
-    #   x = as.Date("1985-04-01"),
-    #   y = 1.0,
-    #   label = "Severe subsidence \n not obvious",
-    #   hjust = "left",
-    #   color = "#BB2D05") +
-    # annotate(
-    #   geom = "curve",
-    #   x = as.Date("2005-04-01"),
-    #   y = 1.0,
-    #   xend = as.Date("2003-04-01"),
-    #   yend = 0.7,
-    #   curvature = 0.0, arrow = arrow(length = unit(2, "mm"))) +
-    # annotate(
-    #   geom = "text",
-    #   x = as.Date("2005-04-01"),
-    #   y = 1.1,
-    #   label = "increasing trend",
-    #   hjust = "middle",
-    #   color = "#BB2D05"
-    # ) 
-  )
-
+      axis.line.x = element_line(),
+    ) + 
+    annotate(
+      geom = "curve",
+      x = as.Date("1985-04-01"),
+      y = 1.0,
+      xend = as.Date("1982-04-01"),
+      yend = 0.7,
+      curvature = 0.,
+      arrow = arrow(length = unit(2, "mm"))
+    ) +
+    geom_label(
+      x = as.Date("1983-04-01"),
+      y = 1.2,
+      label = "more of subsidence \nlimited rainfall",
+      hjust = "left",
+      size = 5
+    ) +
+    annotate(
+      geom = "curve",
+      x = as.Date("2005-04-01"),
+      y = 1.1,
+      xend = as.Date("2003-04-01"),
+      yend = 0.7,
+      curvature = 0,
+      arrow = arrow(length = unit(2, "mm"))
+    ) +
+    geom_label(
+      x = as.Date("2000-04-01"),
+      y = 1.2,
+      label = "increasing trend",
+      hjust = "left",
+      size = 5
+    )
+)
+ 
 ggsave(filename = "quin.pup.png",
        dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
 ```
 
 ## Combined Plt4---
 ```{r, warning=FALSE}
 (plt4 <- plot_grid(
-  ppt,
+  san.pump,
+  ras.pump,
   quin.pump,
-  quin.pup,
   labels = c('AUTO'),
   label_size = 12,
   ncol = 1,
@@ -1031,9 +1131,9 @@ dev.off()
 )
 
 ggsave(filename = "plt4.png",
-       dpi = 1200, height =12,
-       width = 11.5,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       dpi = 1200, height =10,
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
 ```
 
@@ -1138,6 +1238,8 @@ ggsave(filename = "quin.ds.png",
 dev.off()
 ```
 
+
+
 # Modeling ----
 # Annual P
 ```{r}
@@ -1188,11 +1290,11 @@ dev.off()
       curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
   )
 
-ggsave(filename = "rain.ann.png",
-       dpi = 1200, height = 4,
-       width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "rain.ann.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 
 ```
 
@@ -1243,12 +1345,12 @@ dev.off()
       yend = c(590,505),
       curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
   )
-
-ggsave(filename = "aet.ann.pump.png",
-       dpi = 1200, height = 4,
-       width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# 
+# ggsave(filename = "aet.ann.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 ## Annual PET
@@ -1292,7 +1394,7 @@ dev.off()
     labs(x = "Time", 
        y = "Pu (mmyr)", 
        title = "Rasponi Basin (Annual Pumping)",
-       tag = "") +
+       tag = "b") +
    theme_cowplot() +
    theme(
       axis.ticks.y = element_line(),
@@ -1329,7 +1431,7 @@ dev.off()
 ggsave(filename = "ras.ann.pump.png",
        dpi = 1200, height = 4,
        width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
 
 ```
@@ -1347,7 +1449,8 @@ dev.off()
               na.rm = FALSE) +
    labs(x = "Time", 
        y = "pu (mm/yr)", 
-       title = "San Vitale Basin - Annual Pumping") +
+       title = "San Vitale Basin - Annual Pumping",
+       tag = "a") +
    theme(
       axis.ticks.y = element_line(),
       axis.text.y = element_text(),
@@ -1385,9 +1488,11 @@ dev.off()
 ggsave(filename = "san.ann.pump.png",
        dpi = 1200, height = 4,
        width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
 ```
+
+
 ## Annual Quinto
 ```{r}
 (quin.ann.pump = ggplot(data = quin.ann.data,
@@ -1401,7 +1506,8 @@ dev.off()
               na.rm = FALSE) +
     labs(x = "Time", 
        y = "Pu (mm/yr)", 
-       title = "Quinto Basin (Annual Pumping)") +
+       title = "Quinto Basin (Annual Pumping)",
+       tag = "c") +
    theme_cowplot() +
    theme(
       axis.ticks.y = element_line(),
@@ -1443,7 +1549,7 @@ dev.off()
 ggsave(filename = "quin.ann.pump.png",
        dpi = 1200, height = 4,
        width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
 ```
 
@@ -1485,45 +1591,54 @@ season.rain <- df.rain %>%
 season.rain$Month = factor(season.rain$Month, levels = month.abb)
 
 # Visualization with ggplot
-(ppt = ggplot(season.rain, aes(x = Month, y = value,
+ppt = ggplot(season.rain, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = FALSE) +
     labs(caption = "Data Source: ARPAe Emilia Romagna",
          x = "Month",
-         y = "PPT (mm)",
-         title = "Precipitation",
-         subtitle = "Representing the three coastal basins") +
-    season.summary() +
-    theme(
-      axis.ticks.y = element_line(),
-      axis.text.y = element_text(),
-      axis.title.y = element_text(),
-      axis.line.y = element_line(),
-      axis.ticks.x = element_line(),
-      axis.text.x = element_text(),
-      axis.title.x = element_text(),
-      axis.line.x = element_line()
-    ) +
-    theme_cowplot()
-  # annotate(
-  #   geom = "text",
-  #   x = 6,
-  #   y = 250,
-  #   label = "Peak Season (Autumn - Sept to Oct) \n Lowest Season (Summer - Jun to Jul)",
-  #   hjust = "middle",
-  #   color = "#BB2D05"
-  # ) 
-  )
-
-# ggplotly(ppt)
-
-# ggsave(filename = "mm.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+         y = "P (mm/month)",
+         title = "Rainfall",
+         subtitle = "Representing the three coastal basins",
+         tag = "a") +
+  season.summary () +
+    theme_cowplot() +
+  scale_y_continuous(limits = c(0, 150))
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 8.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 150,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 8,
+#       y = 250,
+#       xend = 10,
+#       yend = 150,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 6,
+#       y = 270,
+#       label = "Rainfall at maximum \n in the Autumn",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     )  
+#   )
+# 
+# 
+ggsave(filename = "ppt.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 ## PET
 ```{r,warning=FALSE}
@@ -1562,47 +1677,39 @@ season.pet <- df.pet %>%
 season.pet$Month = factor(season.pet$Month, levels = month.abb)
 
 # Visualization with ggplot
-(pet = ggplot(season.pet, aes(x = Month, y = value,
+pet.ssn = ggplot(season.pet, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = TRUE) +
     labs(
       x = "Month",
-      y = "PET",
+      y = "PET (mm/month)",
       title = "Potential ET",
-      subtitle = "Obtained using Thornthwaite method (1948)"
-    ) +
-    season.summary() +
-        theme(
-      axis.ticks.y = element_line(),
-      axis.text.y = element_text(),
-      axis.title.y = element_text(),
-      axis.line.y = element_line(),
-      axis.ticks.x = element_line(),
-      axis.text.x = element_text(),
-      axis.title.x = element_text(),
-      axis.line.x = element_line()
-    ) +
-    theme_cowplot() 
-  # annotate(
-  #   geom = "text",
-  #   x = 2,
-  #   y = 155,
-  #   label = "Peak Seasons \n (Summer - Jun to Jul) \n Late Spring \n Early Autumn ",
-  #   hjust = "middle",
-  #   color = "#BB2D05"
-  # ) 
-  )
-
-# ggplotly(pet)
-
-# ggsave(filename = "mm.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+      subtitle = "Obtained using Thornthwaite method (1948)",
+      tag = "c"
+    ) + season.summary() +
+  theme_cowplot() +
+  scale_y_continuous(limits = c(0, 150))
+#   annotate(
+#     geom = "text",
+#     x = 2,
+#     y = 155,
+#     label = "Peak Seasons \n (Summer - Jun to Jul) \n Early Spring \n Early Autumn ",
+#     hjust = "middle",
+#     color = "#BB2D05"
+#   )
+#   )
+# 
+# # ggplotly(pet)
+# 
+ggsave(filename = "pet.ssn.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
+
 ## AET
 ```{r}
 # select the column
@@ -1640,44 +1747,35 @@ season.aet <- df.aet %>%
 season.aet$Month = factor(season.aet$Month, levels = month.abb)
 
 # Visualization with ggplot
-(aet = ggplot(season.aet, aes(x = Month, y = value,
+aet.ssn = ggplot(season.aet, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = FALSE) +
     labs(x = "Month",
-         y = "AET",
+         y = "AET (mm/month)",
          title = "Actual ET",
-         subtitle = "Obtained using Thornthwaite Mather procedure (1957)") +
+         subtitle = "Obtained using Thornthwaite Mather procedure (1957)",
+         tag = "b") +
     season.summary() +
-        theme(
-      axis.ticks.y = element_line(),
-      axis.text.y = element_text(),
-      axis.title.y = element_text(),
-      axis.line.y = element_line(),
-      axis.ticks.x = element_line(),
-      axis.text.x = element_text(),
-      axis.title.x = element_text(),
-      axis.line.x = element_line()
-    ) +
     theme_cowplot() 
-  # annotate(
-  #   geom = "text",
-  #   x = 2,
-  #   y = 125,
-  #   label = "Peak Seasons \n (Summer - Jun to Jul) \n Late Spring \n Early Autumn",
-  #   
-  #   hjust = "middle",
-  #   color = "#BB2D05"
-  # ) 
-  )
-# ggplotly(aet)
-
-# ggsave(filename = "mm.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+#   annotate(
+#     geom = "text",
+#     x = 2,
+#     y = 125,
+#     label = "Peak Seasons \n (Summer - Jun to Jul) \n Late Spring \n Early Autumn",
+# 
+#     hjust = "middle",
+#     color = "#BB2D05"
+#   )
+#   )
+# # ggplotly(aet)
+# 
+ggsave(filename = "aet.ssn.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 
@@ -1719,24 +1817,87 @@ season.pu <- df.pu %>%
 season.pu$Month = factor(season.pu$Month, levels = month.abb)
 
 # Visualization with ggplot
-(san_pu <- ggplot(season.pu, aes(x = Month, y = value,
+san_pu <- ggplot(season.pu, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = FALSE) +
     labs(x = "Month",
-         y = "Pu (mm)",
-         title = "San Vitale Pu") +
-    season.theme() +
-    season.theme())
-
-# ggplotly(san_pu)
-
-# ggsave(filename = ".png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+         y = "Pu (mm/month)",
+         title = "San Vitale basin (Pumping)",
+         tag = "a") +
+  season.summary()+
+    theme_cowplot()+
+  scale_y_continuous(limits = c(0, 100))
+#     annotate(
+#       geom = "curve",
+#       x = 2,
+#       y = 55,
+#       xend = 3,
+#       yend = 100,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 2,
+#       y = 105,
+#       label = "High drainage \n winter then late spring",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 0,
+#       xmax = 4.5,
+#       ymin = 0,
+#       ymax = 55,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 25,
+#       xend = 8,
+#       yend = 80,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7.5,
+#       y = 90,
+#       label = "Low Drainage in the \nsummer and winter",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 35,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 11.5,
+#       xmax = 12.5,
+#       ymin = 0,
+#       ymax = 55,
+#       size = 0.5
+#     ) 
+# )
+ggsave(filename = "san_pu.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 
@@ -1777,25 +1938,50 @@ season.pup <- df.pup %>%
 season.pup$Month = factor(season.pup$Month, levels = month.abb)
 
 # Visualization with ggplot
-(san_pup = ggplot(season.pup, aes(x = Month, y = value,
+san_pup = ggplot(season.pup, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = TRUE) +
     labs(x = "Month",
-         y = "Pu/P (mm)",
-         title = "Precipitation / Pumping Ratio") +
-    season.theme() +
-    season.theme() +
-    scale_y_continuous(limits = c(0, 3)))
-
-ggplotly(san_pup)
-
-# ggsave(filename = "pup.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+         y = "Pu/P",
+         title = "Precipitation / Pumping Ratio",
+         tag = "b") +
+    scale_y_continuous(limits = c(0, 3)) +
+  season.summary() +
+    theme_cowplot() 
+#       annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 8.5,
+#       ymin = 0,
+#       ymax = 1.5,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 2,
+#       xend = 7,
+#       yend = 1.2,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7,
+#       y = 2.5,
+#       label = "summer pumping is raised \nhowever, not obvious",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+# )
+ggsave(filename = "san_pup.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## San Vitale Infl
@@ -1835,26 +2021,55 @@ season.infl <- df.infl %>%
 season.infl$Month = factor(season.infl$Month, levels = month.abb)
 
 # Visualization with ggplot
-(san_infl = ggplot(season.infl, aes(x = Month, y = value,
+san_infl.ssn = ggplot(season.infl, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = FALSE) +
     labs(x = "Month",
-         y = "Infl (mm)",
-         title = "Infiltration") +
-    season.theme() +
-    season.theme() + 
-  scale_y_continuous(limits = c(0, 100)))
+         y = "Infl (mm/month)",
+         title = "San Vitale Infiltration",
+         tag = "c") +
+  season.summary() +
+    scale_y_continuous(limits = c(0, 100)) +
+    theme_cowplot()
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 9.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = 11,
+#       y = 50,
+#       xend = 10,
+#       yend = 70,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 9,
+#       y = 85,
+#       label = "Infiltration increases \n due to rainfall and \n drainage is low",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+# )
 
-ggplotly(san_infl)
-
-# ggsave(filename = "pu.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "san_infl.ssn.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
+
+
 ## San Vitale dS
 ```{r,warning= FALSE}
 # select the column
@@ -1892,25 +2107,28 @@ season.dS <- df.dS %>%
 season.dS$Month = factor(season.dS$Month, levels = month.abb)
 
 # Visualization with ggplot
-(san_dS = ggplot(season.dS, aes(x = Month, y = value,
+san_dS.ssn = ggplot(season.dS, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = TRUE) +
     labs(x = "Month",
-         y = "dS (mm)",
-         title = "Change in Water Storage") +
-    season.theme() +
-    season.theme())
+         y = "??S (mm/month)",
+         title = "Change in Water Storage",
+         tag = "d") +
+    season.summary()+
+    theme_cowplot()
 
-ggplotly(san_dS)
+# ggplotly(san_dS)
 
-# ggsave(filename = "pu.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "san_dS.ssn.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
+
+
 ## Rasponi Pu
 ```{r, warning= FALSE}
 # select the column
@@ -1948,24 +2166,87 @@ season.pu <- df.pu %>%
 season.pu$Month = factor(season.pu$Month, levels = month.abb)
 
 # Visualization with ggplot
-(ras_pu <- ggplot(season.pu, aes(x = Month, y = value,
+ras_pu <- ggplot(season.pu, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot( show.legend = FALSE) +
     labs(x = "Month",
-         y = "Pu (mm)",
-         title = "Potential ET") +
-    season.theme() +
-    season.theme())
-
-ggplotly(ras_pu)
-
-# ggsave(filename = ".png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+         y = "Pu (mm/month)",
+         title = "Rasponi basin (Pumping)",
+         tag = "a") +
+   season.summary() +
+    scale_y_continuous(limits = c(0, 70)) +
+    theme_cowplot() 
+#     annotate(
+#       geom = "curve",
+#       x = 2,
+#       y = 50,
+#       xend = 3,
+#       yend = 100,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 2,
+#       y = 100,
+#       label = "High drainage \nwinter then late spring",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 0,
+#       xmax = 4.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 25,
+#       xend = 8,
+#       yend = 80,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7.5,
+#       y = 90,
+#       label = "Low Drainage in the \nsummer and winter",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 25,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 11.5,
+#       xmax = 12.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) 
+# )
+ggsave(filename = "ras_pu.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Rasponi Pu/P
@@ -2005,25 +2286,50 @@ season.pup <- df.pup %>%
 season.pup$Month = factor(season.pup$Month, levels = month.abb)
 
 # Visualization with ggplot
-(ras_pup = ggplot(season.pup, aes(x = Month, y = value,
+ras_pup = ggplot(season.pup, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = TRUE) +
     labs(x = "Month",
-         y = "Pu/P (mm)",
-         title = "Precipitation / Pumping Ratio") +
-    season.theme() +
-    season.theme() +
-    scale_y_continuous(limits = c(0, 3)))
-
-ggplotly(ras_pup)
-
-# ggsave(filename = "pup.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+         y = "Pu/P",
+         title = "Precipitation / Pumping Ratio",
+         tag = "b") +
+    scale_y_continuous(limits = c(0, 2)) +
+  season.summary() +
+    theme_cowplot() 
+#       annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 8.5,
+#       ymin = 0,
+#       ymax = 1,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 2,
+#       xend = 7,
+#       yend = 0.5,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7,
+#       y = 2,
+#       label = "summer umping is raised \nnot obvious",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+# )
+ggsave(filename = "ras_pup.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Rasponi Infl
@@ -2063,25 +2369,52 @@ season.infl <- df.infl %>%
 season.infl$Month = factor(season.infl$Month, levels = month.abb)
 
 # Visualization with ggplot
-(ras_infl = ggplot(season.infl, aes(x = Month, y = value,
+ras_infl = ggplot(season.infl, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = FALSE) +
     labs(x = "Month",
-         y = "Infl (mm)",
-         title = "Infiltration") +
-    season.theme() +
-    season.theme() + 
-  scale_y_continuous(limits = c(0, 100)))
+         y = "Infl (mm/month)",
+         title = "Rasponi Infiltration",
+         tag = "c") +
+    scale_y_continuous(limits = c(0, 100)) +
+  season.summary()+
+    theme_cowplot() 
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 9.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 55,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = 11,
+#       y = 50,
+#       xend = 10,
+#       yend = 70,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 9,
+#       y = 85,
+#       label = "Infiltration increases \n due to rainfall and \n drainage is low",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+# )
 
-ggplotly(ras_infl)
-
-# ggsave(filename = "pu.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "ras_infl.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Rasponi dS
@@ -2121,24 +2454,25 @@ season.dS <- df.dS %>%
 season.dS$Month = factor(season.dS$Month, levels = month.abb)
 
 # Visualization with ggplot
-(ras_dS = ggplot(season.dS, aes(x = Month, y = value,
+ras_dS = ggplot(season.dS, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = TRUE) +
     labs(x = "Month",
-         y = "dS (mm)",
-         title = "Change in Water Storage") +
-    season.theme() +
-    season.theme())
+         y = "??S (mm/month)",
+         title = "Change in Water Storage",
+         tag = "d") +
+    season.summary() +
+  theme_cowplot()
 
-ggplotly(ras_dS)
+# ggplotly(ras_dS)
 
-# ggsave(filename = "pu.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "ras_dS.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Quinto Pu
@@ -2178,24 +2512,89 @@ season.pu <- df.pu %>%
 season.pu$Month = factor(season.pu$Month, levels = month.abb)
 
 # Visualization with ggplot
-(quin_pu <- ggplot(season.pu, aes(x = Month, y = value,
+quin_pu <- ggplot(season.pu, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = FALSE) +
     labs(x = "Month",
-         y = "Pu (mm)",
-         title = "Potential ET") +
-    season.theme() +
-    season.theme())
+         y = "Pu (mm/month)",
+         title = "Quinto basin (pumping)",
+         tag = "a") +
+    scale_y_continuous(limits = c(0, 75)) +
+  season.summary()+
+    theme_cowplot()
+#     ylim(y1 = c(0, 150)) +
+#     annotate(
+#       geom = "curve",
+#       x = 2,
+#       y = 50,
+#       xend = 3,
+#       yend = 100,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 2,
+#       y = 115,
+#       label = "High drainage \n winter then late spring",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 0,
+#       xmax = 4.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 25,
+#       xend = 8,
+#       yend = 80,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7.5,
+#       y = 95,
+#       label = "Low Drainage in the \nsummer and winter",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 25,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 11.5,
+#       xmax = 12.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) 
+# )
 
-ggplotly(ras_pu)
-
-# ggsave(filename = ".png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "quin.pu.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Quinto Pu/P
@@ -2235,25 +2634,51 @@ season.pup <- df.pup %>%
 season.pup$Month = factor(season.pup$Month, levels = month.abb)
 
 # Visualization with ggplot
-(quin_pup = ggplot(season.pup, aes(x = Month, y = value,
+quin_pup = ggplot(season.pup, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend = TRUE) +
     labs(x = "Month",
-         y = "Pu/P (mm)",
+         y = "Pu/P",
          title = "Precipitation / Pumping Ratio") +
-    season.theme() +
-    season.theme() +
-    scale_y_continuous(limits = c(0, 3)))
+    scale_y_continuous(limits = c(0, 2)) +
+  season.summary()+
+    theme_cowplot()
+#       annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 8.5,
+#       ymin = 0,
+#       ymax = 1,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 2,
+#       xend = 7,
+#       yend = 0.5,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7,
+#       y = 2.2,
+#       label = "Pumping is raised in July",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+# )
+# 
 
-ggplotly(quin_pup)
-
-# ggsave(filename = "pup.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "quin_pup.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Quinto Infl
@@ -2293,25 +2718,51 @@ season.infl <- df.infl %>%
 season.infl$Month = factor(season.infl$Month, levels = month.abb)
 
 # Visualization with ggplot
-(quin_infl = ggplot(season.infl, aes(x = Month, y = value,
+quin_infl = ggplot(season.infl, aes(x = Month, y = value,
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot() +
+    geom_boxplot(show.legend =  FALSE) +
     labs(x = "Month",
-         y = "Infl (mm)",
-         title = "Infiltration") +
-    season.theme() +
-    season.theme() + 
-  scale_y_continuous(limits = c(0, 100)))
-
-ggplotly(quin_infl)
-
-# ggsave(filename = "pu.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+         y = "Infl (mm/month)",
+         title = "Quinto Infiltration",
+         tag = "c") +
+    scale_y_continuous(limits = c(0, 100)) +
+    season.summary()+
+    theme_cowplot() 
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 9.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = 11,
+#       y = 50,
+#       xend = 10,
+#       yend = 70,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 9,
+#       y = 85,
+#       label = "Infiltration increases \n due to rainfall and \n drainage is low",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+# )
+ggsave(filename = "quin_infl.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Quinto dS
@@ -2357,19 +2808,20 @@ season.dS$Month = factor(season.dS$Month, levels = month.abb)
     # Specify the geom to be boxplot
     geom_boxplot() +
     labs(x = "Month",
-         y = "dS (mm)",
-         title = "Change in Water Storage") +
-    season.theme() +
-    season.theme())
-
-ggplotly(quin_dS)
-
-# ggsave(filename = "pu.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+         y = "??S (mm/month)",
+         title = "Change in Water Storage",
+         tag = "d") +
+    season.summary()+
+    theme_cowplot()
+)
+ggsave(filename = "quin_dS.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
+
+
 
 ## Seasonal AVG ----
 ## Hydroclimate 
@@ -2433,7 +2885,9 @@ dev.off()
 
 ## San Vitale
 ```{r}
-(ggplot(wat_bal_san)+
+wat_bal_san$mont = factor(wat_bal_san$Mon, levels = month.abb)
+
+(bb <- ggplot(wat_bal_san)+
   geom_line(aes(mont,  P, group = 1, color = "Precipitation"),
             size = 1) +
   geom_line(aes(mont,  Pu, group = 1, color = "Pumping"),
@@ -2447,41 +2901,41 @@ dev.off()
                               "Pumping" = "1E3F63", 
                               "Infiltration" ="steelblue",
                               "dS_in_Storage" = "#FAAB18")) +
-  avg.theme() +
+    theme_cowplot() +
   labs(x = "Months", 
        y = "Average Value", 
        title = "San Vitale Basin",
        tag = "")+
-  # annotate(geom = "segment", 
-  #          x = c(10.5,4,8), 
-  #          xend = c(11,3.5,9.5), 
-  #          y = c(45,70, 80), 
-  #          yend = c(20,35, 70), 
-  #          arrow = arrow(type = "closed",
-  #                        length = unit(0.10, "inches")))+
-  # geom_label(aes(x = 10.5, y = 45, 
-  #                label = "high water table"),
-  #            hjust = 0.5,
-  #            vjust = 0.5,
-  #            fill = "white", 
-  #            label.size = NA,
-  #            size = 4)+
-  # geom_label(aes(x = 4, y = 70, 
-  #                label = "deficit onset"),
-  #            hjust = 0.5,
-  #            vjust = 0.5,
-  #            fill = "white", 
-  #            label.size = NA,
-  #            size = 4)+
-  # geom_label(aes(x = 7, y = 80, 
-  #                label = "high rainfall"),
-  #            hjust = 0.5,
-  #            vjust = 0.5,
-  #            fill = "white", 
-  #            label.size = NA,
-  #            size = 4)+
-  # geom_hline(yintercept = 0, 
-  #            linetype="dashed")) +
+  annotate(geom = "segment",
+           x = c(10.5,4,8),
+           xend = c(11,3.5,9.5),
+           y = c(45,70, 80),
+           yend = c(20,35, 70),
+           arrow = arrow(type = "closed",
+                         length = unit(0.10, "inches")))+
+  geom_label(aes(x = 10.5, y = 45,
+                 label = "high water table"),
+             hjust = 0.5,
+             vjust = 0.5,
+             fill = "white",
+             label.size = NA,
+             size = 4)+
+  geom_label(aes(x = 4, y = 70,
+                 label = "deficit onset"),
+             hjust = 0.5,
+             vjust = 0.5,
+             fill = "white",
+             label.size = NA,
+             size = 4)+
+  geom_label(aes(x = 7, y = 80,
+                 label = "high rainfall"),
+             hjust = 0.5,
+             vjust = 0.5,
+             fill = "white",
+             label.size = NA,
+             size = 4)+
+  geom_hline(yintercept = 0,
+             linetype="dashed")) +
   theme(
     axis.ticks.y = element_line(),
     axis.text.y = element_text(),
@@ -2490,15 +2944,22 @@ dev.off()
     axis.ticks.x = element_line(),
     axis.text.x = element_text(),
     axis.title.x = element_text(),
-    axis.line.x = element_line()
+    axis.line.x = element_line(),
+    legend.position = "bottom"
   )
+
+# ggsave(filename = "bb.png",
+#        dpi = 1200,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+
 ```
 
 ## Rasponi
 ```{r}
 wat_bal_ras$mont = factor(wat_bal_ras$Mon, levels = month.abb)
 
-ggplot(wat_bal_ras)+
+(cc <- ggplot(wat_bal_ras)+
   geom_line(aes(mont,  P, group = 1, color = "Precipitation"),
             size = 1) +
   geom_line(aes(mont,  Pu, group = 1, color = "Pumping"),
@@ -2512,41 +2973,49 @@ ggplot(wat_bal_ras)+
                               "Pumping" = "1E3F63", 
                               "Infiltration" ="steelblue",
                               "dS_in_Storage" = "#FAAB18")) +
-  avg.theme() +
-  labs(x = "Months", 
-       y = "Average Value", 
+    theme_cowplot() +
+  labs(x = "Months",
+       y = "Average Value",
        title = "Rasponi Basin",
-       tag = "")+
-  annotate(geom = "segment", 
-           x = c(10.5,4,8), 
-           xend = c(11,3.5,9.5), 
-           y = c(55,35, 80), 
-           yend = c(25,25, 70), 
-           arrow = arrow(type = "closed",
-                         length = unit(0.10, "inches")))+
-  geom_label(aes(x = 10, y = 55, 
-                 label = "high water table"),
-             hjust = 0.5,
-             vjust = 0.5,
-             fill = "white", 
-             label.size = NA,
-             size = 4)+
-  geom_label(aes(x = 4, y = 38, 
-                 label = "deficit onset"),
-             hjust = 0.5,
-             vjust = 0.5,
-             fill = "white", 
-             label.size = NA,
-             size = 4)+
-  geom_label(aes(x = 7, y = 80, 
-                 label = "high rainfall"),
-             hjust = 0.5,
-             vjust = 0.5,
-             fill = "white", 
-             label.size = NA,
-             size = 4)+
-  geom_hline(yintercept = 0, 
-             linetype="dashed") +
+       tag = "") +
+  annotate(
+    geom = "segment",
+    x = c(10.5, 4, 8),
+    xend = c(11, 3.5, 9.5),
+    y = c(55, 35, 80),
+    yend = c(25, 25, 70),
+    arrow = arrow(type = "closed",
+                  length = unit(0.10, "inches"))
+  ) +
+  geom_label(
+    aes(x = 10, y = 55,
+        label = "high water table"),
+    hjust = 0.5,
+    vjust = 0.5,
+    fill = "white",
+    label.size = NA,
+    size = 4
+  ) +
+  geom_label(
+    aes(x = 4, y = 38,
+        label = "deficit onset"),
+    hjust = 0.5,
+    vjust = 0.5,
+    fill = "white",
+    label.size = NA,
+    size = 4
+  ) +
+  geom_label(
+    aes(x = 7, y = 80,
+        label = "high rainfall"),
+    hjust = 0.5,
+    vjust = 0.5,
+    fill = "white",
+    label.size = NA,
+    size = 4
+  ) +
+  geom_hline(yintercept = 0,
+             linetype = "dashed") +
   theme(
     axis.ticks.y = element_line(),
     axis.text.y = element_text(),
@@ -2555,15 +3024,22 @@ ggplot(wat_bal_ras)+
     axis.ticks.x = element_line(),
     axis.text.x = element_text(),
     axis.title.x = element_text(),
-    axis.line.x = element_line()
+    axis.line.x = element_line(),
+    legend.position = "bottom"
   )
+)
+
+ggsave(filename = "cc.png",
+       dpi = 1200,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Quinto
 ```{r}
 wat_bal_quin$mont = factor(wat_bal_quin$Mon, levels = month.abb)
 
-ggplot(wat_bal_quin)+
+(aa <- ggplot(wat_bal_quin)+
   geom_line(aes(mont,  P, group = 1, color = "Precipitation"),
             size = 1) +
   geom_line(aes(mont,  Pu, group = 1, color = "Pumping"),
@@ -2572,46 +3048,59 @@ ggplot(wat_bal_quin)+
             size = 1)+
   geom_line(aes(mont,  dS, group = 1, color = "dS_in_Storage"),
             size = 1)+
-  scale_color_manual(name = "mm/month",
-                     values=c("Precipitation" = "307FE2",
-                              "Pumping" = "1E3F63", 
-                              "Infiltration" ="steelblue",
-                              "dS_in_Storage" = "#FAAB18")) +
-  avg.theme() + 
-  labs(x = "Months", 
-       y = "Average Value", 
+  scale_color_manual(
+    name = "mm/month",
+    values = c(
+      "Precipitation" = "307FE2",
+      "Pumping" = "1E3F63",
+      "Infiltration" = "steelblue",
+      "dS_in_Storage" = "#FAAB18"
+    )
+  ) +
+  labs(x = "Months",
+       y = "Average Value",
        title = "Quinto Basin",
-       tag = "")+
-  annotate(geom = "segment", 
-           x = c(10.5,4,8), 
-           xend = c(11,3.5,9.5), 
-           y = c(55,35, 80), 
-           yend = c(30,25, 70), 
-           arrow = arrow(type = "closed",
-                         length = unit(0.10, "inches")))+
-  geom_label(aes(x = 10, y = 55, 
-                 label = "high water table"),
-             hjust = 0.5,
-             vjust = 0.5,
-             fill = "white", 
-             label.size = NA,
-             size = 4)+
-  geom_label(aes(x = 4, y = 42, 
-                 label = "high pumping"),
-             hjust = 0.5,
-             vjust = 0.5,
-             fill = "white", 
-             label.size = NA,
-             size = 4)+
-  geom_label(aes(x = 7, y = 80, 
-                 label = "high rainfall"),
-             hjust = 0.5,
-             vjust = 0.5,
-             fill = "white", 
-             label.size = NA,
-             size = 4)+
-  geom_hline(yintercept = 0, 
-             linetype="dashed") +
+       tag = "") +
+  theme_cowplot()+
+  annotate(
+    geom = "segment",
+    x = c(10.5, 4, 8),
+    xend = c(11, 3.5, 9.5),
+    y = c(55, 35, 80),
+    yend = c(30, 25, 70),
+    arrow = arrow(type = "closed",
+                  length = unit(0.10, "inches"))
+  ) +
+  geom_label(
+    aes(x = 10, y = 55,
+        label = "high water table"),
+    hjust = 0.5,
+    vjust = 0.5,
+    fill = "white",
+    label.size = NA,
+    size = 4
+  ) +
+  geom_label(
+    aes(x = 4, y = 42,
+        label = "high pumping"),
+    hjust = 0.5,
+    vjust = 0.5,
+    fill = "white",
+    label.size = NA,
+    size = 4
+  ) +
+  geom_label(
+    aes(x = 7, y = 80,
+        label = "high rainfall"),
+    hjust = 0.5,
+    vjust = 0.5,
+    fill = "white",
+    label.size = NA,
+    size = 4
+  ) +
+  geom_hline(yintercept = 0,
+             linetype = "dashed") +
+    theme_cowplot() +
   theme(
     axis.ticks.y = element_line(),
     axis.text.y = element_text(),
@@ -2620,8 +3109,14 @@ ggplot(wat_bal_quin)+
     axis.ticks.x = element_line(),
     axis.text.x = element_text(),
     axis.title.x = element_text(),
-    axis.line.x = element_line()
+    axis.line.x = element_line(),
+    legend.position = "bottom"
   )
+)
+# ggsave(filename = "aa.png",
+#        dpi = 1200,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
 ```
 
 ## Water Budget ----
@@ -2668,6 +3163,7 @@ df1 <- melt(water_budget[,c("Sub_period",
       axis.line.x = element_line(),
       legend.position = "bottom"
     )
+
 
 # ggplotly(aet)
 
@@ -2720,6 +3216,7 @@ df2 <- melt(water_budget[,c("Sub_period",
       axis.line.x = element_line(),
       legend.position = "bottom"
     )
+)
 
 ggsave(filename = "pl2.png",
        dpi = 1200, height = 4,
@@ -2771,11 +3268,12 @@ df3 <- melt(water_budget[,c("Sub_period",
       legend.position = "bottom"
     )
 
-ggsave(filename = "pl3.png",
-       dpi = 1200, height = 4,
-       width = 8,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+
+# ggsave(filename = "pl3.png",
+#        dpi = 1200, height = 4,
+#        width = 8,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 ## Drought Index ----
@@ -2784,6 +3282,7 @@ dev.off()
 # Concert date to POSXCIT
 newyear <- parse_date_time(spi.data[,1], "by")
 dates <- as.Date.POSIXct(newyear)
+
 
 Drought_pos1 <- ifelse(spi.data$spi <= 0, 0, spi.data$spi)
 Drought_neg1 <- ifelse(spi.data$spi >= 0, 0, spi.data$spi)
@@ -2794,8 +3293,8 @@ df <- tibble(spi.data, Drought_neg1, Drought_pos1, dates)
   drought.spi <- ggplot(df) +
     geom_area(aes(dates, Drought_pos1, fill = "wetter_period")) +
     geom_area(aes(dates, Drought_neg1, fill = "drier_period")) +
-    labs(x = "Years",
-         y = "Value",
+    labs(x = "Time",
+         y = "Normalized Value",
          title = "Standardized Precipitation Index (SPI)",
          tag = "A",
          subtitle = "Rainfall parameterization only") +
@@ -2810,26 +3309,47 @@ df <- tibble(spi.data, Drought_neg1, Drought_pos1, dates)
                         wetter_period = "blue",
                         drier_period = "red"
                       )) +
-  theme(
-    axis.ticks.y = element_line(),
-    axis.text.y = element_text(),
-    axis.title.y = element_text(),
-    axis.line.y = element_line(),
-    axis.ticks.x = element_line(),
-    axis.text.x = element_text(),
-    axis.title.x = element_text(),
-    axis.line.x = element_line(),
-    legend.position = "none"
-  )
-  
+    theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line(),
+      legend.position = "none"
+    ) +
+    annotate(
+      geom = "curve",
+      x = as.Date("1988-04-01"),
+      y = 2,
+      xend = as.Date("1985-04-01"),
+      yend = -0.2,
+      curvature = 0.3,
+      arrow = arrow(length = unit(2, "mm"))
+    ) +
+   geom_label(
+       x = as.Date("1980-04-01"),
+      y = 2,
+      label = "extended period of dryness",
+      hjust = "left",
+      size = 5
+    ) +
+  annotate("rect",
+           alpha = 0,
+           color = "black",
+        xmin = as.Date("1983-04-01"), xmax = as.Date("1993-04-01"),
+        ymin = -2.5, ymax = -0.2, 
+        size = 0.5) 
 )
 
 ggsave(filename = "drouht.spi.png",
        dpi = 1200, height = 4,
        width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       path ="D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
-  
+
 #+scale_color_manual(" ", values=c(wetter="blue", drier="red")) 
 ```
 ## SPEI
@@ -2853,8 +3373,8 @@ df <- cbind.data.frame(Drought_Index, Drought_neg, Drought_pos)
               alpha = 1) +
     geom_area(aes(dates, Drought_neg,
                   fill = "drier_period"), alpha = 1) +
-    labs(x = "Years",
-         y = "Value",
+    labs(x = "Time",
+         y = "Normalized Value",
          title = "Standardized Precipitation Evaporation Index (SPEI)",
          tag = "B",
          subtitle = "Rainfall and temperature (Hagreave's Formula) parameterization") +
@@ -2880,12 +3400,34 @@ df <- cbind.data.frame(Drought_Index, Drought_neg, Drought_pos)
     axis.title.x = element_text(),
     axis.line.x = element_line(),
     legend.position = "bottom"
-    )
+    )+
+      annotate(
+      geom = "curve",
+      x = as.Date("1988-04-01"),
+      y = 2,
+      xend = as.Date("1985-04-01"),
+      yend = -0.2,
+      curvature = 0.3,
+      arrow = arrow(length = unit(2, "mm"))
+    ) +
+   geom_label(
+       x = as.Date("1980-04-01"),
+      y = 2,
+      label = "extended period of dryness",
+      hjust = "left",
+      size = 5
+    ) +
+  annotate("rect",
+           alpha = 0,
+           color = "black",
+        xmin = as.Date("1983-04-01"), xmax = as.Date("2000-04-01"),
+        ymin = -2.2, ymax = -0.2, 
+        size = 0.5) 
 )
 ggsave(filename = "drouht.spei.png",
        dpi = 1200, height = 4,
        width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 dev.off()
 ```
 
