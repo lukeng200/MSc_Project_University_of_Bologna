@@ -533,22 +533,20 @@ san.pup = ggplot(df.san.pup,
 
 ## Combined plt2 ----
 ```{r, warning=FALSE}
-(plt2 <- plot_grid(
-  ras.pump,
-  san.pump,
-  quin.pump,
-  labels = c('AUTO'),
-  label_size = 12,
-  ncol = 1,
-  align = 'h',
-  axis = 1)
-)
-
-ggsave(filename = "plt2.png",
-       dpi = 1200, height =12,
-       width = 11.5,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-dev.off()
+# (plt2 <- plot_grid(
+#   san.pump,
+#   labels = c('AUTO'),
+#   label_size = 12,
+#   ncol = 1,
+#   align = 'h',
+#   axis = 1)
+# )
+# 
+# ggsave(filename = "plt2.png",
+#        dpi = 1200, height =12,
+#        width = 11.5,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
 ```
 
 ## San Vitale Infl
@@ -645,11 +643,11 @@ df.san.ds <- tibble(date, unclass.san.ds)
       axis.line.x = element_line())
 )
 
-ggsave(filename = "san.ds.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "san.ds.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 
 ```
 
@@ -839,11 +837,11 @@ dev.off()
   axis = 1)
 )
 
-ggsave(filename = "plt3.png",
-       dpi = 1200, height =12,
-       width = 11.5,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "plt3.png",
+#        dpi = 1200, height =12,
+#        width = 11.5,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 
@@ -892,11 +890,11 @@ df.ras.inf <- tibble(date, unclass.ras.inf)
     theme_cowplot()
 )
 
-ggsave(filename = "ras.infl.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "ras.infl.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 ## Rasponi dS
@@ -947,11 +945,11 @@ df.ras.ds <- tibble(date, unclass.ras.ds)
     theme_cowplot() 
 )
 
-ggsave(filename = "ras.ds.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "ras.ds.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 
@@ -1181,11 +1179,11 @@ df.quin.inf <- tibble(date, unclass.quin.inf)
     theme_cowplot()
 )
 
-ggsave(filename = "quin.infl.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "quin.infl.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 ## Quinto dS
@@ -1231,11 +1229,11 @@ df.quin.ds <- tibble(date, unclass.quin.ds)
     theme_cowplot()
 )
 
-ggsave(filename = "quin.ds.png",
-       dpi = 1200, height = 4,
-       width = 12,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "quin.ds.png",
+#        dpi = 1200, height = 4,
+#        width = 12,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 
@@ -2875,11 +2873,11 @@ wat_bal_san$mont = factor(wat_bal_san$Mon, levels = month.abb)
   axis = 1)
 )
 
-ggsave(filename = "plt5.png",
-       dpi = 1200, height =12,
-       width = 16,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "plt5.png",
+#        dpi = 1200, height =12,
+#        width = 16,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 
@@ -3167,11 +3165,11 @@ df1 <- melt(water_budget[,c("Sub_period",
 
 # ggplotly(aet)
 
-ggsave(filename = "pl1.png",
-       dpi = 1200, height = 4,
-       width = 8,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+# ggsave(filename = "pl1.png",
+#        dpi = 1200, height = 4,
+#        width = 8,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 ## Rasponi 
@@ -3216,13 +3214,13 @@ df2 <- melt(water_budget[,c("Sub_period",
       axis.line.x = element_line(),
       legend.position = "bottom"
     )
-)
 
-ggsave(filename = "pl2.png",
-       dpi = 1200, height = 4,
-       width = 8,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+
+# ggsave(filename = "pl2.png",
+#        dpi = 1200, height = 4,
+#        width = 8,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 ## Quinto
@@ -3505,11 +3503,11 @@ year <- subsidence$Year
    
   )
 
- ggsave(filename = "sub.png",
-       dpi = 1200, height = 6,
-       width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-dev.off()
+#  ggsave(filename = "sub.png",
+#        dpi = 1200, height = 6,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
 ```
 
 
