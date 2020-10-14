@@ -210,7 +210,6 @@ Mycolours <-
 ## Monthly AET
 ```{r}
 ## Data Manipulation for PET
-# Time Series of AET
 aet.ts <- ts(san.mon.data$aet, frequency = 12, start = c(1971,1))
 # moving average
 aet.ma = ma(aet.ts, order = 12, centre = T)
