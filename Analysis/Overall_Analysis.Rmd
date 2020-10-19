@@ -1425,11 +1425,12 @@ df.quin.ds <- tibble(date, unclass.quin.ds)
       curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
   )
   
-ggsave(filename = "ras.ann.pump.png",
-       dpi = 1200, height = 4,
-       width = 10,
-       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-dev.off()
+# ggsave(filename = "ras.ann.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+
 
 ```
 
