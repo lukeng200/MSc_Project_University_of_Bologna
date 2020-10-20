@@ -1,0 +1,1392 @@
+---
+title: "seasonality"
+author: "SOBOYEJO LUKMAN ADEBOYE"
+date: "01/06/2020"
+output: word_document
+always_allow_html: true
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_knit$set(echo= FALSE)
+```
+
+## Packages Installed -------------------------------------------------------------------------#
+```{r, warning= FALSE}
+# pkgs <-
+  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape", "cowplot", "imputeTS", "dplyr"))
+# install.packages(pkgs)
+
+library(forecast)   # For the moving avearage timeseries
+library(patchwork)  # For combining plots
+library(ggplot2)    # For Visualization
+library(plotly)     # For interactive plot
+library(lubridate)  #
+library(knitr)
+library(tidyverse)
+library(pander)
+library(ggthemes)
+library(reshape2)
+library(cowplot)
+library(imputeTS)
+library(dplyr)
+```
+
+## Read file into R ---------------------------------------------------------------#
+```{r}
+
+# Monthly Time series
+rm(list=ls(all=TRUE))
+library(RCurl)
+san.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/san.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+san.parse.date <- mutate(san.mon.data, parse.date = parse_date_time(year, "by"))
+san.newdate <- mutate(san.parse.date, newdate = as.Date(parse.date))
+san.mon <- mutate(san.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(san.mon)
+head(san.mon)
+
+
+# Rasponi Basin Data
+ras.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/ras.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+ras.parse.date <- mutate(ras.mon.data, parse.date = parse_date_time(year, "by"))
+ras.newdate <- mutate(ras.parse.date, newdate = as.Date(parse.date))
+ras.mon <- mutate(ras.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(ras.mon)
+head(ras.mon)
+
+
+
+# Quinto Basin Data
+quin.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/quin.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+quin.parse.date <- mutate(quin.mon.data, parse.date = parse_date_time(year, "by"))
+quin.newdate <- mutate(quin.parse.date, newdate = as.Date(parse.date))
+quin.mon <- mutate(quin.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(quin.mon)
+head(quin.mon)
+
+# # kable()
+# # pander()
+```
+
+## Theme --------------------------------------------------------------------------------------#
+```{r}
+
+#Creating colour scheme
+Mycolours <- c("dodgerblue3", "darkorange2", "hotpink2", "magenta3", "red", "skyblue1", "gold", "grey57")
+
+
+
+season.summary <- function(){
+      # Add a red line to the mean
+    stat_summary(aes(ymax = ..y.., ymin = ..y..),
+               fun = "mean",
+               geom = "pointrange", 
+               # Use geom_errorbar to add line as mean
+               color = "red",
+               position = position_dodge(width = 0.75), 
+               # Add the line to each group
+               show.legend = FALSE)
+
+}
+```
+
+## Seasonality --------------------------------------------------------------------------------#
+## Rainfall
+```{r, warning= FALSE}
+
+# select the column
+rain <- san.mon[ ,2]
+date <- san.mon[ ,10]
+# Combined Observations into data frame
+df.rain <- tibble(date, rain)
+
+season.rain <- df.rain %>%
+  # Convert data frame from lwide format to long format
+  gather(season.rain, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.rain = str_replace(season.rain, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.rain$Month = factor(season.rain$Month, levels = month.abb)
+
+# Visualization with ggplot
+(ppt = ggplot(season.rain, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = FALSE) +
+    labs(caption = "Data Source: ARPAe Emilia Romagna",
+         x = "Month",
+         y = "P (mm/month)",
+         title = "Rainfall",
+         subtitle = "Representing the three coastal basins",
+         tag = "") +
+  season.summary () +
+    theme_cowplot() +
+  scale_y_continuous(limits = c(0, 150))
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 8.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 150,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 8,
+#       y = 250,
+#       xend = 10,
+#       yend = 150,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 6,
+#       y = 270,
+#       label = "Rainfall at maximum \n in the Autumn",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     )  
+   )
+# 
+# 
+# ggsave(filename = "ppt.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## AET
+```{r}
+# select the column
+aet <- san.mon[,4]
+date <- san.mon[ ,10]
+# Combined Observations into data frame
+df.aet <- tibble(date, aet)
+
+season.aet <- df.aet %>%
+  # Convert data frame from lwide format to long format
+  gather(season.aet, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.aet = str_replace(season.aet, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.aet$Month = factor(season.aet$Month, levels = month.abb)
+
+# Visualization with ggplot
+(aet.ssn = ggplot(season.aet, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = FALSE) +
+    labs(x = "Month",
+         y = "AET (mm/month)",
+         title = "Actual ET",
+         subtitle = "Obtained using Thornthwaite Mather procedure (1957)",
+         tag = "") +
+    season.summary() +
+    theme_cowplot()
+#   annotate(
+#     geom = "text",
+#     x = 2,
+#     y = 125,
+#     label = "Peak Seasons \n (Summer - Jun to Jul) \n Late Spring \n Early Autumn",
+# 
+#     hjust = "middle",
+#     color = "#BB2D05"
+#   )
+  )
+# # ggplotly(aet)
+# 
+# ggsave(filename = "aet.ssn.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## Potential ET
+```{r,warning=FALSE}
+
+# select the column
+pet <- san.mon[,3]
+date <- san.mon[ ,10]
+# Combined Observations into data frame
+df.pet <- tibble(date, pet)
+
+season.pet <- df.pet %>%
+  # Convert data frame from lwide format to long format
+  gather(season.pet, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.pet = str_replace(season.pet, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.pet$Month = factor(season.pet$Month, levels = month.abb)
+
+# Visualization with ggplot
+(pet.ssn = ggplot(season.pet, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = TRUE) +
+    labs(
+      x = "Month",
+      y = "PET (mm/month)",
+      title = "Potential ET",
+      subtitle = "Obtained using Thornthwaite method (1948)",
+      tag = "c"
+    ) + season.summary() +
+  theme_cowplot() +
+  scale_y_continuous(limits = c(0, 150))
+#   annotate(
+#     geom = "text",
+#     x = 2,
+#     y = 155,
+#     label = "Peak Seasons \n (Summer - Jun to Jul) \n Early Spring \n Early Autumn ",
+#     hjust = "middle",
+#     color = "#BB2D05"
+#   )
+   )
+# 
+# # ggplotly(pet)
+# 
+# ggsave(filename = "pet.ssn.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## San Vitale Pumping ------------------------------------------------------------#
+```{r,warning= FALSE}
+# select the column
+pu <- san.mon[,5]
+date <- san.mon[ ,10]
+# Combined Observations into data frame
+df.pu <- tibble(date, pu)
+
+season.pu <- df.pu %>%
+  # Convert data frame from lwide format to long format
+  gather(season.pu, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.pu = str_replace(season.pu, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.pu$Month = factor(season.pu$Month, levels = month.abb)
+
+# Visualization with ggplot
+(san_pu <- ggplot(season.pu, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = FALSE) +
+    labs(x = "Month",
+         y = "Pu (mm/month)",
+         title = "San Vitale basin (Pumping)",
+         tag = "a") +
+  season.summary()+
+    theme_cowplot()+
+  scale_y_continuous(limits = c(0, 100))
+#     annotate(
+#       geom = "curve",
+#       x = 2,
+#       y = 55,
+#       xend = 3,
+#       yend = 100,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 2,
+#       y = 105,
+#       label = "High drainage \n winter then late spring",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 0,
+#       xmax = 4.5,
+#       ymin = 0,
+#       ymax = 55,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 25,
+#       xend = 8,
+#       yend = 80,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7.5,
+#       y = 90,
+#       label = "Low Drainage in the \nsummer and winter",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 35,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 11.5,
+#       xmax = 12.5,
+#       ymin = 0,
+#       ymax = 55,
+#       size = 0.5
+#     ) 
+ )
+# ggsave(filename = "san_pu.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+
+## SanVitale Pu/P
+```{r, warning= FALSE}
+# select the column
+pup <- san.mon.data[,6]
+date <- san.mon[ ,10]
+# Combined Observations into data frame
+df.pup <- tibble(date, pup)
+
+season.pup <- df.pup %>%
+  # Convert data frame from lwide format to long format
+  gather(season.pup, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.pup = str_replace(season.pup, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.pup$Month = factor(season.pup$Month, levels = month.abb)
+
+# Visualization with ggplot
+(san_pup = ggplot(season.pup, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = TRUE) +
+    labs(x = "Month",
+         y = "Pu/P",
+         title = "Pumping / Precipitation Ratio",
+         tag = "b") +
+    scale_y_continuous(limits = c(0, 3)) +
+  season.summary() +
+    theme_cowplot()
+#       annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 8.5,
+#       ymin = 0,
+#       ymax = 1.5,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 2,
+#       xend = 7,
+#       yend = 1.2,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7,
+#       y = 2.5,
+#       label = "summer pumping is raised \nhowever, not obvious",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+ )
+# ggsave(filename = "san_pup.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## San Vitale Infl
+```{r, warning= FALSE}
+# select the column
+infl <- san.mon.data[,7]
+date <- san.mon[ ,10]
+# Combined Observations into data frame
+df.infl <- tibble(date, infl)
+
+season.infl <- df.infl %>%
+  # Convert data frame from lwide format to long format
+  gather(season.infl, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.infl = str_replace(season.infl, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.infl$Month = factor(season.infl$Month, levels = month.abb)
+
+# Visualization with ggplot
+(san_infl.ssn = ggplot(season.infl, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = FALSE) +
+    labs(x = "Month",
+         y = "Infl (mm/month)",
+         title = "San Vitale Infiltration",
+         tag = "c") +
+  season.summary() +
+    scale_y_continuous(limits = c(0, 100)) +
+    theme_cowplot()
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 9.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = 11,
+#       y = 50,
+#       xend = 10,
+#       yend = 70,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 9,
+#       y = 85,
+#       label = "Infiltration increases \n due to rainfall and \n drainage is low",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+)
+
+# ggsave(filename = "san_infl.ssn.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+
+## San Vitale dS
+```{r,warning= FALSE}
+
+# select the column
+dS <- san.mon.data[,8]
+date <- san.mon[ ,10]
+# Combined Observations into data frame
+df.dS <- tibble(date, dS)
+
+season.dS <- df.dS %>%
+  # Convert data frame from lwide format to long format
+  gather(season.dS, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.dS = str_replace(season.dS, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.dS$Month = factor(season.dS$Month, levels = month.abb)
+
+# Visualization with ggplot
+(san_dS.ssn = ggplot(season.dS, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = TRUE) +
+    labs(x = "Month",
+         y = "??S (mm/month)",
+         title = "Change in Water Storage",
+         tag = "d") +
+    season.summary() +
+    theme_cowplot()
+)
+
+# ggplotly(san_dS)
+
+# ggsave(filename = "san_dS.ssn.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+
+## Rasponi Pumping ----------------------------------------------------------------#
+```{r, warning= FALSE}
+# select the column
+pu <- ras.mon[ ,5]
+date <- ras.mon[ ,10]
+# Combined Observations into data frame
+df.pu <- tibble(date, pu)
+
+season.pu <- df.pu %>%
+  # Convert data frame from lwide format to long format
+  gather(season.pu, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.pu = str_replace(season.pu, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.pu$Month = factor(season.pu$Month, levels = month.abb)
+
+# Visualization with ggplot
+(ras_pu <- ggplot(season.pu, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot( show.legend = FALSE) +
+    labs(x = "Month",
+         y = "Pu (mm/month)",
+         title = "Rasponi basin (Pumping)",
+         tag = "a") +
+   season.summary() +
+    scale_y_continuous(limits = c(0, 70)) +
+    theme_cowplot() 
+#     annotate(
+#       geom = "curve",
+#       x = 2,
+#       y = 50,
+#       xend = 3,
+#       yend = 100,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 2,
+#       y = 100,
+#       label = "High drainage \nwinter then late spring",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 0,
+#       xmax = 4.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 25,
+#       xend = 8,
+#       yend = 80,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7.5,
+#       y = 90,
+#       label = "Low Drainage in the \nsummer and winter",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 25,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 11.5,
+#       xmax = 12.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) 
+ )
+# ggsave(filename = "ras_pu.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## Rasponi Pu/P
+```{r, warning= FALSE}
+
+# select the column
+pup <- ras.mon[,6]
+date <- ras.mon[ ,10]
+# Combined Observations into data frame
+df.pup <- tibble(date, pup)
+
+season.pup <- df.pup %>%
+  # Convert data frame from lwide format to long format
+  gather(season.pup, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.pup = str_replace(season.pup, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.pup$Month = factor(season.pup$Month, levels = month.abb)
+
+# Visualization with ggplot
+(ras_pup = ggplot(season.pup, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = TRUE) +
+    labs(x = "Month",
+         y = "Pu/P",
+         title = "Pumping / Precipitation Ratio",
+         tag = "b") +
+    scale_y_continuous(limits = c(0, 2)) +
+  season.summary() +
+    theme_cowplot() 
+#       annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 8.5,
+#       ymin = 0,
+#       ymax = 1,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 2,
+#       xend = 7,
+#       yend = 0.5,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7,
+#       y = 2,
+#       label = "summer umping is raised \nnot obvious",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+ )
+
+# ggsave(filename = "ras_pup.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## Rasponi Infiltration
+```{r, warning = FALSE}
+
+# select the column
+infl <- ras.mon[,7]
+date <- ras.mon[ ,10]
+# Combined Observations into data frame
+df.infl <- tibble(date, infl)
+
+season.infl <- df.infl %>%
+  # Convert data frame from lwide format to long format
+  gather(season.infl, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.infl = str_replace(season.infl, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.infl$Month = factor(season.infl$Month, levels = month.abb)
+
+# Visualization with ggplot
+(ras_infl = ggplot(season.infl, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = FALSE) +
+    labs(x = "Month",
+         y = "Infl (mm/month)",
+         title = "Rasponi Infiltration",
+         tag = "c") +
+    scale_y_continuous(limits = c(0, 100)) +
+  season.summary()+
+    theme_cowplot() 
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 9.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 55,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = 11,
+#       y = 50,
+#       xend = 10,
+#       yend = 70,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 9,
+#       y = 85,
+#       label = "Infiltration increases \n due to rainfall and \n drainage is low",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+ )
+
+# ggsave(filename = "ras_infl.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## Rasponi dS
+```{r,warning= FALSE}
+
+# select the column
+dS <- ras.mon[,8]
+date <- ras.mon[ ,10]
+# Combined Observations into data frame
+df.dS <- tibble(date, dS)
+
+season.dS <- df.dS %>%
+  # Convert data frame from lwide format to long format
+  gather(season.dS, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.dS = str_replace(season.dS, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.dS$Month = factor(season.dS$Month, levels = month.abb)
+
+# Visualization with ggplot
+(ras_dS = ggplot(season.dS, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = TRUE) +
+    labs(x = "Month",
+         y = "??S (mm/month)",
+         title = "Change in Water Storage",
+         tag = "d") +
+    season.summary() +
+  theme_cowplot()
+)
+
+# ggplotly(ras_dS)
+
+# ggsave(filename = "ras_dS.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## Quinto Pumping ----------------------------------------------------------------#
+```{r, warning= FALSE}
+
+# select the column
+pu <- quin.mon[,5]
+date <- quin.mon[ ,10]
+# Combined Observations into data frame
+df.pu <- tibble(date, pu)
+
+season.pu <- df.pu %>%
+  # Convert data frame from lwide format to long format
+  gather(season.pu, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.pu = str_replace(season.pu, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.pu$Month = factor(season.pu$Month, levels = month.abb)
+
+# Visualization with ggplot
+(quin_pu <- ggplot(season.pu, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = FALSE) +
+    labs(x = "Month",
+         y = "Pu (mm/month)",
+         title = "Quinto basin (pumping)",
+         tag = "a") +
+    scale_y_continuous(limits = c(0, 75)) +
+  season.summary()+
+    theme_cowplot()
+#     ylim(y1 = c(0, 150)) +
+#     annotate(
+#       geom = "curve",
+#       x = 2,
+#       y = 50,
+#       xend = 3,
+#       yend = 100,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 2,
+#       y = 115,
+#       label = "High drainage \n winter then late spring",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 0,
+#       xmax = 4.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 25,
+#       xend = 8,
+#       yend = 80,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7.5,
+#       y = 95,
+#       label = "Low Drainage in the \nsummer and winter",
+#       hjust = "left",
+#       size = 4,
+#       show.legend = FALSE
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 25,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 11.5,
+#       xmax = 12.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) 
+ )
+
+# ggsave(filename = "quin.pu.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## Quinto Pu/P
+```{r, warning= FALSE}
+
+# select the column
+pup <- quin.mon[,6]
+date <- quin.mon[ ,10]
+# Combined Observations into data frame
+df.pup <- tibble(date, pup)
+
+season.pup <- df.pup %>%
+  # Convert data frame from lwide format to long format
+  gather(season.pup, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.pup = str_replace(season.pup, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.pup$Month = factor(season.pup$Month, levels = month.abb)
+
+# Visualization with ggplot
+(quin_pup = ggplot(season.pup, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend = TRUE) +
+    labs(x = "Month",
+         y = "Pu/P",
+         title = "Pumping Ratio / Precipitation") +
+    scale_y_continuous(limits = c(0, 2)) +
+  season.summary()+
+    theme_cowplot()
+#       annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 4.5,
+#       xmax = 8.5,
+#       ymin = 0,
+#       ymax = 1,
+#       size = 0.5
+#     ) +
+#   annotate(geom = "curve",
+#       x = 7,
+#       y = 2,
+#       xend = 7,
+#       yend = 0.5,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 7,
+#       y = 2.2,
+#       label = "Pumping is raised in July",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+ )
+
+# ggsave(filename = "quin_pup.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## Quinto Infiltration
+```{r, warning= FALSE}
+
+# select the column
+infl <- quin.mon.data[,7]
+date <- quin.mon[ ,10]
+# Combined Observations into data frame
+df.infl <- tibble(date, infl)
+
+season.infl <- df.infl %>%
+  # Convert data frame from lwide format to long format
+  gather(season.infl, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.infl = str_replace(season.infl, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.infl$Month = factor(season.infl$Month, levels = month.abb)
+
+# Visualization with ggplot
+(quin_infl = ggplot(season.infl, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot(show.legend =  FALSE) +
+    labs(x = "Month",
+         y = "Infl (mm/month)",
+         title = "Quinto Infiltration",
+         tag = "c") +
+    scale_y_continuous(limits = c(0, 100)) +
+    season.summary()+
+    theme_cowplot() 
+#     annotate(
+#       "rect",
+#       alpha = 0,
+#       color = "black",
+#       xmin = 9.5,
+#       xmax = 11.5,
+#       ymin = 0,
+#       ymax = 50,
+#       size = 0.5
+#     ) +
+#     annotate(
+#       geom = "curve",
+#       x = 11,
+#       y = 50,
+#       xend = 10,
+#       yend = 70,
+#       curvature = 0,
+#       arrow = arrow(length = unit(2, "mm"))
+#     ) +
+#     geom_label(
+#       x = 9,
+#       y = 85,
+#       label = "Infiltration increases \n due to rainfall and \n drainage is low",
+#       hjust = "middle",
+#       size = 4,
+#       show.legend = FALSE
+#     )
+ )
+# ggsave(filename = "quin_infl.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+## Quinto dS
+```{r, warning= TRUE}
+
+# select the column
+dS <- quin.mon[,8]
+date <- quin.mon[ ,10]
+# Combined Observations into data frame
+df.dS <- tibble(date, dS)
+
+season.dS <- df.dS %>%
+  # Convert data frame from lwide format to long format
+  gather(season.dS, value, -date) %>%
+  # Remove "obs" in the Observation column
+  mutate(season.dS = str_replace(season.dS, "date", "")) %>%
+  # Convert the DATE column to date class
+  mutate(DATE = ymd(date)) %>%
+  # Create Month column
+  mutate(Month = month(date)) %>%
+  # Create Season column
+  mutate(Month = case_when(
+    Month %in% c(1)      ~ "Jan",
+    Month %in% c(2)       ~ "Feb",
+    Month %in% c(3)       ~ "Mar",
+    Month %in% c(4)     ~ "Apr",
+    Month %in% c(5)      ~ "May",
+    Month %in% c(6)       ~ "Jun",
+    Month %in% c(7)       ~ "Jul",
+    Month %in% c(8)     ~ "Aug",
+    Month %in% c(9)      ~ "Sep",
+    Month %in% c(10)       ~ "Oct",
+    Month %in% c(11)       ~ "Nov",
+    Month %in% c(12)     ~ "Dec",
+    TRUE                        ~ NA_character_
+  ))
+
+# Convert to factor
+season.dS$Month = factor(season.dS$Month, levels = month.abb)
+
+# Visualization with ggplot
+(quin_dS = ggplot(season.dS, aes(x = Month, y = value,
+                      fill = Month, 
+                      class = Month)) +
+    # Specify the geom to be boxplot
+    geom_boxplot() +
+    labs(x = "Month",
+         y = "??S (mm/month)",
+         title = "Change in Water Storage",
+         tag = "d") +
+    season.summary()+
+    theme_cowplot()
+)
+
+# ggsave(filename = "quin_dS.png",
+#        dpi = 1200, height = 4,
+#        width = 6,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
