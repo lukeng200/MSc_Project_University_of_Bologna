@@ -1,0 +1,449 @@
+---
+title: "annual_time_series"
+author: "SOBOYEJO LUKMAN ADEBOYE"
+date: "01/06/2020"
+output: word_document
+always_allow_html: true
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_knit$set(echo= FALSE)
+```
+
+## Packages Installed -------------------------------------------------------------------------#
+```{r, warning= FALSE}
+# pkgs <-
+  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape", "cowplot", "imputeTS", "dplyr"))
+# install.packages(pkgs)
+
+library(forecast)   # For the moving avearage timeseries
+library(patchwork)  # For combining plots
+library(ggplot2)    # For Visualization
+library(plotly)     # For interactive plot
+library(lubridate)  #
+library(knitr)
+library(tidyverse)
+library(pander)
+library(ggthemes)
+library(reshape2)
+library(cowplot)
+library(imputeTS)
+library(dplyr)
+```
+
+
+## Read file into R ---------------------------------------------------------------#
+```{r}
+
+# Monthly Time series
+rm(list=ls(all=TRUE))
+library(RCurl)
+san.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/san.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+san.parse.date <- mutate(san.mon.data, parse.date = parse_date_time(year, "by"))
+san.newdate <- mutate(san.parse.date, newdate = as.Date(parse.date))
+san.mon <- mutate(san.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(san.mon)
+head(san.mon)
+
+
+# Rasponi Basin Data
+ras.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/ras.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+ras.parse.date <- mutate(ras.mon.data, parse.date = parse_date_time(year, "by"))
+ras.newdate <- mutate(ras.parse.date, newdate = as.Date(parse.date))
+ras.mon <- mutate(ras.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(ras.mon)
+head(ras.mon)
+
+
+
+# Quinto Basin Data
+quin.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/quin.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+quin.parse.date <- mutate(quin.mon.data, parse.date = parse_date_time(year, "by"))
+quin.newdate <- mutate(quin.parse.date, newdate = as.Date(parse.date))
+quin.mon <- mutate(quin.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(quin.mon)
+head(quin.mon)
+
+# # kable()
+# # pander()
+```
+
+
+# Modeling (Time Series)-----------------------------------------------------------#
+# Annual Precipitation
+```{r}
+
+san.ann.data <- group_by(san.mon, year)
+san.ann.p <- summarise(san.ann.data, p = sum(p, na.rm = TRUE))
+head(san.ann.p)
+
+(rain.ann = ggplot(data = san.ann.p, 
+           mapping = aes(x = year, y = p)) +
+  geom_line() + 
+  geom_smooth(method = "loess", 
+              formula = y ~ x, 
+              span = 0.5, 
+              level = 0.95, 
+              se = TRUE, 
+              na.rm = FALSE)+
+  labs(x = "Time", 
+       y = "P (mm/yr)", 
+       title = "Annual Rainfall",
+       subtitle = "Representing the three coastal basins",
+       tag = "a") +
+   theme_cowplot()+
+    theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line()) +
+   annotate(
+     "segment",
+     x = c(1997,2007),
+     xend = c(2019,2019),
+     y = c(774.16,593.41),
+     yend = c(774.16,593.41),
+     linetype = "dashed") +
+    annotate(
+      geom = "text",
+      x = c(2007,2021),
+      y = c(850, 700),
+      label = c("??time (1997 to 2006)","??P"),
+      hjust = "middle",
+      color = "#BB2D05") +
+    annotate(
+      geom = "curve",
+      x = c(2019,2019),
+      y = c(700,600),
+      xend = c(2019,2019),
+      yend = c(600,780),
+      curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
+  )
+
+# ggsave(filename = "rain.ann.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+
+```
+
+
+
+## Annual Actual ET
+```{r}
+
+san.ann.data <- group_by(san.mon, year)
+san.ann.aet <- summarise(san.ann.data, aet = sum(aet, na.rm = TRUE))
+head(san.ann.aet)
+
+(aet.ann = ggplot(data = san.ann.aet, 
+                 mapping = aes(x = year, y = aet)) +
+  geom_line() + 
+  geom_smooth(method = "loess", 
+              formula = y ~ x, 
+              span = 0.5, 
+              level = 0.95, se = TRUE, 
+              na.rm = FALSE) +
+  labs(x = "Time", 
+       y = "AET (mm/yr)", 
+       title = "Actual Evapotranspiration",
+       subtitle = "Obtained using Thornthwaite Mather procedure (1957)", 
+       tag = "b") +
+   theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line()) +
+   theme_cowplot() +
+   annotate(
+     "segment",
+     x = c(1997,2007),
+     xend = c(2019,2019),
+     y = c(590,505),
+     yend = c(586.95,504.84),
+     linetype = "dashed") +
+    annotate(
+      geom = "text",
+      x = c(2007,2021),
+      y = c(610, 550),
+      label = c("?? time (1997-2006)","??P"),
+      hjust = "middle",
+      color = "#BB2D05") +
+    annotate(
+      geom = "curve",
+      x = c(2019,2019),
+      y = c(550,550),
+      xend = c(2019,2019),
+      yend = c(590,505),
+      curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
+  )
+# 
+# ggsave(filename = "aet.ann.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+
+# Annual Potentail ET
+```{r}
+
+san.ann.data <- group_by(san.mon, year)
+san.ann.pet <- summarise(san.ann.data, pet = sum(pet, na.rm = TRUE))
+
+(ras.ann.pump <- ggplot(data = san.ann.pet, 
+              mapping = aes(x = year, y = pet)) +
+    geom_line() + 
+   geom_smooth(method = "loess", 
+              formula = y ~ x, 
+              span = 0.5, 
+              level = 0.96, 
+              se = TRUE, 
+              na.rm = FALSE) +
+    labs(x = "Time", 
+       y = "Pu (mmyr)", 
+       title = "Rasponi Basin (Annual Pumping)",
+       tag = "b") +
+   theme_cowplot() +
+   theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line()) 
+)
+  #  annotate(
+  #    "segment",
+  #    x = c(2007, 2018),
+  #    xend = c(2021, 2021),
+  #    y = c(146.05,251.89),
+  #    yend = c(146.05,251.89),
+  #    linetype = "dashed") +
+  #   annotate(
+  #     geom = "text",
+  #     x = c(2015,2023),
+  #     y = c(120, 200),
+  #     label = c("??time (2007 - 2018)","??P"),
+  #     hjust = "middle",
+  #     color = "#BB2D05") +
+  #   annotate(
+  #     geom = "curve",
+  #     x = c(2021,2021),
+  #     y = c(155,155),
+  #     xend = c(2021,2021),
+  #     yend = c(146,251),
+  #     curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
+  # )
+  
+# ggsave(filename = "ras.ann.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+
+
+```
+
+## Annual San_Vitale Pumping
+```{r}
+
+san.ann.data <- group_by(san.mon, year)
+san.ann.pu <- summarise(san.ann.data, pu = sum(pu, na.rm = FALSE))
+
+(san.ann.pump = ggplot(data = san.ann.pu,
+                      mapping = aes(x = year, y = pu)) +
+    geom_line() + 
+    geom_smooth(method = "loess", 
+              formula = y ~ x, 
+              span = 0.5, 
+              level = 0.95, 
+              se = TRUE, 
+              na.rm = FALSE) +
+   labs(x = "Time", 
+       y = "pu (mm/yr)", 
+       title = "San Vitale Basin - Annual Pumping",
+       tag = "a") +
+   theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line()) +
+   theme_cowplot() +
+   annotate(
+     "segment",
+     x = c(2007, 2018),
+     xend = c(2021, 2021),
+     y = c(315.06,125.87),
+     yend = c(315.06,125.87),
+     linetype = "dashed") +
+    annotate(
+      geom = "text",
+      x = c(2015,2023),
+      y = c(400, 250),
+      label = c("??time (2007 - 2018)","??P"),
+      hjust = "middle",
+      color = "#BB2D05") +
+    annotate(
+      geom = "curve",
+      x = c(2021,2021),
+      y = c(290,290),
+      xend = c(2021,2021),
+      yend = c(315,125.87),
+      curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
+  )
+  
+
+# ggsave(filename = "san.ann.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
+
+# Annual Rasponi Pumping
+```{r}
+
+ras.ann.data <- group_by(ras.mon, year)
+ras.ann.pu <- summarise(ras.ann.data, pu = sum(pu, na.rm = FALSE))
+
+## Visualization with ggplot
+(ras.ann.pump = ggplot(data = ras.ann.pu, 
+              mapping = aes(x = year, y = pu)) +
+    geom_line() + 
+   geom_smooth(method = "loess", 
+              formula = y ~ x, 
+              span = 0.5, 
+              level = 0.96, 
+              se = TRUE, 
+              na.rm = FALSE)+
+    labs(x = "Time", 
+       y = "Pu (mmyr)", 
+       title = "Rasponi Basin (Annual Pumping)",
+       tag = "b") +
+   theme_cowplot() +
+   theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line()) +
+   annotate(
+     "segment",
+     x = c(2007, 2018),
+     xend = c(2021, 2021),
+     y = c(146.05,251.89),
+     yend = c(146.05,251.89),
+     linetype = "dashed") +
+    annotate(
+      geom = "text",
+      x = c(2015,2023),
+      y = c(120, 200),
+      label = c("??time (2007 - 2018)","??P"),
+      hjust = "middle",
+      color = "#BB2D05") +
+    annotate(
+      geom = "curve",
+      x = c(2021,2021),
+      y = c(155,155),
+      xend = c(2021,2021),
+      yend = c(146,251),
+      curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
+  )
+  
+# ggsave(filename = "ras.ann.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+
+```
+
+## Annual Quinto Pumping
+```{r}
+
+quin.ann.data <- group_by(quin.mon, year)
+quin.ann.pu <- summarise(quin.ann.data, pu = sum(pu, na.rm = TRUE))
+
+(quin.ann.pump = ggplot(data = quin.ann.pu,
+            mapping = aes(x = year, y = pu)) +
+    geom_line() + 
+    geom_smooth(method = "loess",
+              formula = y ~ x,
+              span = 0.5, 
+              level = 0.95,
+              se = TRUE, 
+              na.rm = FALSE) +
+    labs(x = "Time", 
+       y = "Pu (mm/yr)", 
+       title = "Quinto Basin (Annual Pumping)",
+       tag = "c") +
+   theme_cowplot() +
+   theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line()) +
+   annotate(
+     "segment",
+     x = c(2007, 2018),
+     xend = c(2021, 2021),
+     y = c(234.23, 291.96),
+     yend = c(234.23, 291.96),
+     linetype = "dashed"
+   ) +
+   annotate(
+     geom = "text",
+     x = c(2015, 2023),
+     y = c(190,260),
+     label = c("??time (2007-2018)", "??P"),
+     hjust = "middle",
+     color = "#BB2D05"
+   ) +
+   annotate(
+     geom = "curve",
+     x = c(2021, 2021),
+     y = c(260, 250),
+     xend = c(2021, 2021),
+     yend = c(234, 291),
+     curvature = 0.0,
+     arrow = arrow(length = unit(2, "mm"))
+   )
+)
+  
+
+# ggsave(filename = "quin.ann.pump.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+```
