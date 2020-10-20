@@ -1,0 +1,193 @@
+---
+title: "Drought_Calculation_in_R"
+author: "SOBOYEJO LUKMAN ADEBOYE"
+date: "01/06/2020"
+output: word_document
+always_allow_html: true
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_knit$set(echo= FALSE)
+```
+
+## Packages Installed --------------------------------------------------------------------------#
+```{r, warning= FALSE}
+# pkgs <-
+  (c("ggplot2","spi", "cowplot", "SPEI", "lubridate" "dplyr"))
+# install.packages(pkgs)
+
+library(ggplot2)
+library(spi)
+library(SPEI)
+library(lubridate)
+library(dplyr)
+```
+
+```{r}
+
+rm(list=ls(all=TRUE))
+library(RCurl)
+san.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/san.mon.csv"),
+                  header = T,sep = ",")
+
+drought_data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/drought_data.csv"),
+                  header = T,sep = ",")
+head(drought_data)
+
+# Date Conversion to POSIXct
+newyear = parse_date_time(san.mon.data[,1], "by")
+dates = as.Date.POSIXct(newyear)
+
+```
+
+# Standardised Precipitation Index SPI
+```{r, warning= FALSE}
+
+spi24 <- spi(drought_data$P, 24)
+head(spi24)
+
+spi_fitted <- spi24$fitted
+head(spi_fitted)
+
+spi_fitted_df <- cbind.data.frame(dates, spi_fitted)
+names(spi_fitted_df)[2] <- "spi"
+head(spi_fitted_df)
+
+#spei index
+Drought_pos1 <- ifelse(spi_fitted_df$spi <= 0, 0, spi_fitted_df$spi)
+Drought_neg1 <- ifelse(spi_fitted_df$spi >= 0, 0, spi_fitted_df$spi)
+
+df <- cbind.data.frame(dates, Drought_neg1, Drought_pos1)
+
+(
+  drought.spi <- ggplot(df) +
+    geom_area(aes(dates, Drought_pos1, fill = "wetter_period")) +
+    geom_area(aes(dates, Drought_neg1, fill = "drier_period")) +
+    labs(x = "Time",
+         y = "Normalized Value",
+         title = "Standardized Precipitation Index (SPI)",
+         tag = "A",
+         subtitle = "Rainfall parameterization only") +
+    scale_x_date(
+      date_breaks = "5 year",
+      date_minor_breaks = "5 year",
+      date_labels = "%Y"
+    ) +
+    theme_cowplot() +
+    scale_fill_manual("SPI",
+                      values = c(
+                        wetter_period = "blue",
+                        drier_period = "red"
+                      )) +
+    theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line(),
+      legend.position = "bottom")
+  #   annotate(
+  #     geom = "curve",
+  #     x = as.Date("1988-04-01"),
+  #     y = 2,
+  #     xend = as.Date("1985-04-01"),
+  #     yend = -0.2,
+  #     curvature = 0.3,
+  #     arrow = arrow(length = unit(2, "mm"))
+  #   ) +
+  #  geom_label(
+  #      x = as.Date("1980-04-01"),
+  #     y = 2,
+  #     label = "extended period of dryness",
+  #     hjust = "left",
+  #     size = 5
+  #   ) +
+  # annotate("rect",
+  #          alpha = 0,
+  #          color = "black",
+  #       xmin = as.Date("1983-04-01"), xmax = as.Date("1993-04-01"),
+  #       ymin = -2.5, ymax = -0.2, 
+  #       size = 0.5) 
+)
+
+# ggsave(filename = "drouht.spi.png",
+#        dpi = 1200, height = 4,
+#        width = 10,
+#        path ="D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+# dev.off()
+
+#+scale_color_manual(" ", values=c(wetter="blue", drier="red")) 
+```
+
+# Standardised Precipitation Evapotranspiration Index SPEI
+```{r, warning= FALSE}
+
+# Calculating PET from hargreaves formula
+drought_data$pet <- hargreaves(Tmin = drought_data$t_min, Tmax = drought_data$t_max, lat = 44)
+head(drought_data)
+
+# Subtract the PET from P
+CWBAL <- drought_data$P - drought_data$pet
+head(CWBAL)
+
+spei24 <- spei(CWBAL, 24)
+head(spei24)
+
+spei_fitted <- spei24$fitted
+head(spei_fitted)
+
+spei_fitted_df <- cbind.data.frame(dates, spei_fitted)
+
+
+#spei index
+Drought1 = spei_fitted_df
+Drought_pos <- ifelse(Drought1$ET0_har <= 0, 0, Drought1$ET0_har)  
+
+Drought2 = spei_fitted_df
+Drought_neg <- ifelse(Drought1$ET0_har >= 0, 0, Drought1$ET0_har) 
+
+df <- cbind.data.frame(dates, Drought_neg, Drought_pos)
+
+(drought.spei = ggplot(df) +
+    geom_area(aes(dates, Drought_pos,
+                  fill = "wetter_period"),
+              alpha = 1) +
+    geom_area(aes(dates, Drought_neg,
+                  fill = "drier_period"), alpha = 1) +
+    labs(x = "Time",
+         y = "Normalized Value",
+         title = "Standardized Precipitation Evaporation Index (SPEI)",
+         tag = "b",
+         subtitle = "Rainfall and temperature (Hagreave's Formula) parameterization") +
+    theme_cowplot() +
+    scale_fill_manual(
+      " ",
+      values = c(
+        wetter_period = "blue",
+        drier_period = "red",
+        alpha = 0.5
+      )
+    ) +
+    scale_x_date(date_breaks = "5 year",
+                 date_minor_breaks = "5 year",
+                 date_labels = "%Y") +
+    theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line(),
+      legend.position = "bottom"
+    )
+)
+```
+
+
+
+
