@@ -1,0 +1,314 @@
+---
+title: "monthly_forecasting"
+author: "SOBOYEJO LUKMAN ADEBOYE"
+date: "01/06/2020"
+output: word_document
+always_allow_html: true
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_knit$set(echo= FALSE)
+```
+
+## Packages Installed -------------------------------------------------------------------------#
+```{r, warning= FALSE}
+# pkgs <-
+  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape", "cowplot", "imputeTS", "dplyr"))
+# install.packages(pkgs)
+
+library(forecast)   # For the moving avearage timeseries
+library(patchwork)  # For combining plots
+library(ggplot2)    # For Visualization
+library(plotly)     # For interactive plot
+library(lubridate)  #
+library(knitr)
+library(tidyverse)
+library(pander)
+library(ggthemes)
+library(reshape2)
+library(cowplot)
+library(imputeTS)
+library(dplyr)
+```
+
+
+## Read file into R ---------------------------------------------------------------#
+```{r}
+
+# Monthly Time series
+rm(list=ls(all=TRUE))
+library(RCurl)
+san.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/san.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+san.parse.date <- mutate(san.mon.data, parse.date = parse_date_time(year, "by"))
+san.newdate <- mutate(san.parse.date, newdate = as.Date(parse.date))
+san.mon <- mutate(san.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(san.mon)
+head(san.mon)
+
+
+# Rasponi Basin Data
+ras.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/ras.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+ras.parse.date <- mutate(ras.mon.data, parse.date = parse_date_time(year, "by"))
+ras.newdate <- mutate(ras.parse.date, newdate = as.Date(parse.date))
+ras.mon <- mutate(ras.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(ras.mon)
+head(ras.mon)
+
+
+
+# Quinto Basin Data
+quin.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/quin.mon.csv"),
+                  header = T,sep = ",")
+# Date Conversion to POSXCIT
+quin.parse.date <- mutate(quin.mon.data, parse.date = parse_date_time(year, "by"))
+quin.newdate <- mutate(quin.parse.date, newdate = as.Date(parse.date))
+quin.mon <- mutate(quin.newdate, year = as.POSIXlt(newdate)$year + 1900)
+str(quin.mon)
+head(quin.mon)
+
+# # kable()
+# # pander()
+```
+
+
+# San Vitale -----------------------------------------------------------------------#
+```{r}
+# Time Series
+san_ts = ts(san.mon$pu, frequency = 12, start = c(1971,1))
+
+# imputeTS: Time Series Missing Value; Imputation in R by Steffen Moritz and Thomas Bartz-Beielstein
+san_ts.imp <- na_kalman(san_ts)
+ggplot_na_imputations(san_ts, san_ts.imp) + theme_cowplot()
+plot.ts(san_ts.imp)
+
+# Decomposing time series into trend,seasonality and randomness assuming multiplicative model
+san_ts_components= decompose(san_ts.imp, type = "additive")
+plot(san_ts_components)
+
+# ACF and PACF of data
+# par(mfrow=c(1,3))
+plot.ts(san_ts.imp)
+acf(san_ts.imp, lag.max=20)
+pacf(san_ts.imp, lag.max=20)
+```
+
+#---------Building ARIMA model ------------------------------------------------------#
+```{r}
+
+# ACF and PACF plots show trend and seasonility
+# Performing differences to make the data stationary
+# calculating "d "for Trend
+par(mfrow = c(1, 1))
+san_ts_diff1 = diff(san_ts.imp, differences = 1)
+plot(san_ts_diff1)
+
+# Checking ACF and PACF for after differencing for above values 
+par(mfrow=c(1,2))
+acf(san_ts_diff1, lag.max=20)
+pacf(san_ts_diff1, lag.max=20)
+
+# Performing seasonal differencing and checking for value of D
+par(mfrow = c(1, 1))
+san_ts_seas_diff1=diff(san_ts.imp, lag = 12, differences=1)
+plot(san_ts_seas_diff1)
+
+# Checking ACF and PACF for seasonally differenced data
+par(mfrow = c(1, 2))
+acf(san_ts_seas_diff1)
+pacf(san_ts_seas_diff1)
+
+# Calculating ndiffs and nsdiffs
+ndiffs(san_ts.imp)
+nsdiffs(san_ts.imp)
+
+```
+
+#------Differencing seasonaaly differenced data again--------------#
+```{r}
+
+par(mfrow = c(1, 1))
+seas_diff=diff(san_ts_seas_diff1, differences=1)
+plot(seas_diff)
+par(mfrow = c(1, 2))
+acf(seas_diff)
+pacf(seas_diff)
+
+# Implementing ARIMA model
+# auto.arima(san_ts.imp)
+model= Arima(san_ts.imp, order = c(1,1,1),seasonal = c(0,1,1), include.drift = FALSE)
+
+# Checking residuals to ensure they are white noise
+par(mfrow = c(1, 2))
+acf(model$residuals, lag.max = 24)
+pacf(model$residuals, lag.max = 24)
+Box.test(model$residuals, lag=24, type="Ljung-Box")
+
+# Forecasting using Arima model
+par(mfrow = c(1, 1))
+data_ts_forecast=forecast(model,h= 100)
+plot(data_ts_forecast)
+
+data_ts_forecast$mean
+```
+
+
+# Rasponi -----------------------------------------------------------------------#
+```{r}
+# Time Series
+ras_ts = ts(ras.mon$pu, frequency = 12, start = c(1971,1))
+
+# imputeTS: Time Series Missing Value; Imputation in R by Steffen Moritz and Thomas Bartz-Beielstein
+ras_ts.imp <- na_kalman(ras_ts)
+ggplot_na_imputations(ras_ts, ras_ts.imp) + theme_cowplot()
+plot.ts(ras_ts.imp)
+
+# Decomposing time series into trend,seasonality and randomness assuming multiplicative model
+ras_ts_components= decompose(ras_ts.imp, type = "additive")
+plot(ras_ts_components)
+
+# ACF and PACF of data
+# par(mfrow=c(1,3))
+plot.ts(ras_ts.imp)
+acf(ras_ts.imp, lag.max=20)
+pacf(ras_ts.imp, lag.max=20)
+```
+
+#---------Building ARIMA model ------------------------------------------------------#
+```{r}
+
+# ACF and PACF plots show trend and seasonility
+# Performing differences to make the data stationary
+# calculating "d "for Trend
+par(mfrow = c(1, 1))
+ras_ts_diff1 = diff(ras_ts.imp, differences = 1)
+plot(ras_ts_diff1)
+
+# Checking ACF and PACF for after differencing for above values 
+par(mfrow=c(1,2))
+acf(ras_ts_diff1, lag.max=20)
+pacf(ras_ts_diff1, lag.max=20)
+
+# Performing seasonal differencing and checking for value of D
+par(mfrow = c(1, 1))
+ras_ts_seas_diff1=diff(ras_ts.imp, lag = 12, differences=1)
+plot(ras_ts_seas_diff1)
+
+# Checking ACF and PACF for seasonally differenced data
+par(mfrow = c(1, 2))
+acf(ras_ts_seas_diff1)
+pacf(ras_ts_seas_diff1)
+
+# Calculating ndiffs and nsdiffs
+ndiffs(ras_ts.imp)
+nsdiffs(ras_ts.imp)
+
+```
+
+#------Differencing seasonaaly differenced data again--------------#
+```{r}
+
+par(mfrow = c(1, 1))
+seas_diff=diff(ras_ts_seas_diff1, differences=1)
+plot(seas_diff)
+par(mfrow = c(1, 2))
+acf(seas_diff)
+pacf(seas_diff)
+
+# Implementing ARIMA model
+auto.arima(ras_ts.imp)
+model= Arima(ras_ts.imp, order = c(4,0,0),seasonal = c(0,1,1), include.drift = FALSE)
+
+# Checking residuals to ensure they are white noise
+par(mfrow = c(1, 2))
+acf(model$residuals, lag.max = 24)
+pacf(model$residuals, lag.max = 24)
+Box.test(model$residuals, lag=24, type="Ljung-Box")
+
+# Forecasting using Arima model
+par(mfrow = c(1, 1))
+data_ts_forecast=forecast(model,h= 100)
+plot(data_ts_forecast)
+
+data_ts_forecast$mean
+```
+
+
+# Quinto -----------------------------------------------------------------------#
+```{r}
+# Time Series
+quin_ts = ts(quin.mon$pu, frequency = 12, start = c(1971,1))
+plot.ts(quin_ts)
+
+# Decomposing time series into trend,seasonality and randomness assuming multiplicative model
+quin_ts_components= decompose(quin_ts, type = "additive")
+plot(quin_ts_components)
+
+# ACF and PACF of data
+# par(mfrow=c(1,3))
+plot.ts(quin_ts)
+acf(quin_ts, lag.max=20)
+pacf(quin_ts, lag.max=20)
+```
+
+#---------Building ARIMA model ------------------------------------------------------#
+```{r}
+
+# ACF and PACF plots show trend and seasonility
+# Performing differences to make the data stationary
+# calculating "d "for Trend
+par(mfrow = c(1, 1))
+quin_ts_diff1 = diff(quin_ts, differences = 1)
+plot(quin_ts_diff1)
+
+# Checking ACF and PACF for after differencing for above values 
+par(mfrow=c(1,2))
+acf(quin_ts_diff1, lag.max=20)
+pacf(quin_ts_diff1, lag.max=20)
+
+# Performing seasonal differencing and checking for value of D
+par(mfrow = c(1, 1))
+quin_ts_seas_diff1=diff(quin_ts, lag = 12, differences=1)
+plot(quin_ts_seas_diff1)
+
+# Checking ACF and PACF for seasonally differenced data
+par(mfrow = c(1, 2))
+acf(quin_ts_seas_diff1)
+pacf(quin_ts_seas_diff1)
+
+# Calculating ndiffs and nsdiffs
+ndiffs(quin_ts)
+nsdiffs(quin_ts)
+
+```
+
+#------Differencing seasonaaly differenced data again--------------#
+
+```{r}
+par(mfrow = c(1, 1))
+seas_diff = diff(quin_ts_seas_diff1, differences=1)
+plot(seas_diff)
+par(mfrow = c(1, 2))
+acf(seas_diff)
+pacf(seas_diff)
+
+# Implementing ARIMA model
+# auto.arima(quin_ts.imp)
+model= Arima(quin_ts, order = c(1,1,1),seasonal = c(1,0,1), include.drift = FALSE)
+
+# Checking residuals to ensure they are white noise
+par(mfrow = c(1, 2))
+acf(model$residuals, lag.max = 24)
+pacf(model$residuals, lag.max = 24)
+Box.test(model$residuals, lag=24, type="Ljung-Box")
+
+# Forecasting using Arima model
+par(mfrow = c(1, 1))
+data_ts_forecast=forecast(model,h= 100)
+plot(data_ts_forecast)
+
+data_ts_forecast$mean
+```
