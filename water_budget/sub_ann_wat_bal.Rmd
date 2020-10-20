@@ -1,0 +1,202 @@
+---
+title: "monthly_time_series"
+author: "SOBOYEJO LUKMAN ADEBOYE"
+date: "01/06/2020"
+output: word_document
+always_allow_html: true
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_knit$set(echo= FALSE)
+```
+
+## Packages Installed -------------------------------------------------------------------------#
+```{r, warning= FALSE}
+# pkgs <-
+  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape", "cowplot", "imputeTS", "dplyr"))
+# install.packages(pkgs)
+
+library(forecast)   # For the moving avearage timeseries
+library(patchwork)  # For combining plots
+library(ggplot2)    # For Visualization
+library(plotly)     # For interactive plot
+library(lubridate)  #
+library(knitr)
+library(tidyverse)
+library(pander)
+library(ggthemes)
+library(reshape2)
+library(cowplot)
+library(imputeTS)
+library(dplyr)
+```
+
+## Read file into R ---------------------------------------------------------------#
+```{r}
+
+# Monthly Time series
+rm(list=ls(all=TRUE))
+library(RCurl)
+
+# Sub period water balance
+water_budget = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/sub_ann_wat_bal.csv"),
+                  header = T,sep = ",")
+head(water_budget)
+```
+
+## San Vitale Water Budget --------------------------------------------------------------------#
+```{r}
+df1 <- melt(water_budget[,c("Sub_period",
+                   "Pump_SanVitale","Actual_ET", 
+                   "Precipitation", "Seep_SanVitale")], id.vars = 1)
+
+
+(pl1 <- ggplot(df1,
+                aes(x = Sub_period,
+                    y =value)) + 
+      geom_bar(aes(fill = variable), 
+           stat = "identity", 
+           position = "dodge",
+           width = 0.8) + 
+      geom_line() +
+      labs(x = "Sub-period",
+           y = "??mm",
+           title = "Change in San Vitale Water Budget") +
+    theme_cowplot() +
+      scale_fill_brewer(palette="Reds") +
+      theme_cowplot() +
+      annotate(geom = "text", 
+           x = c(1,2,3, 4, 5),  
+           y = c(200,200, -200, 200,200), 
+           label = c("",
+                     "",
+                     "",
+                     "",
+                     ""),
+           size = 3) +
+     geom_hline(yintercept = 0)+
+     geom_vline(xintercept = 1.5)) +
+      theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line(),
+      legend.position = "bottom"
+    )
+
+
+# ggplotly(aet)
+
+# ggsave(filename = "pl1.png",
+#        dpi = 1200, height = 4,
+#        width = 8,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
+```
+
+## Rasponi Water Budget ------------------------------------------------------------------------#
+```{r}
+df2 <- melt(water_budget[,c("Sub_period",
+                   "Pump_Rasponi","Actual_ET", 
+                   "Precipitation", "Seep_Rasponi")], id.vars = 1)
+
+
+(pl2 <- ggplot(df2,
+                aes(x = Sub_period,
+                    y =value)) + 
+      geom_bar(aes(fill = variable), 
+           stat = "identity", 
+           position = "dodge",
+           width = 0.8) + 
+      geom_line() +
+      labs(x = "Sub-period",
+           y = "??mm",
+           title = "Change in Rasponi Water Budget") +
+      scale_fill_brewer(palette="Reds") +
+      theme_cowplot() +
+      annotate(geom = "text", 
+           x = c(1,2,3, 4, 5),  
+           y = c(200,200, -200, 200,200), 
+           label = c("",
+                     "",
+                     "",
+                     "",
+                     ""),
+           size = 3) +
+     geom_hline(yintercept = 0)+
+     geom_vline(xintercept = 1.5)) +
+      theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line(),
+      legend.position = "bottom"
+    )
+
+
+# ggsave(filename = "pl2.png",
+#        dpi = 1200, height = 4,
+#        width = 8,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
+```
+
+## Quinto Water Budget -------------------------------------------------------------------------#
+```{r}
+df3 <- melt(water_budget[,c("Sub_period",
+                   "Pump_Quinto","Actual_ET", 
+                   "Precipitation", "Seep_Quinto")], id.vars = 1)
+
+
+(pl3 <- ggplot(df3,
+                aes(x = Sub_period,
+                    y =value)) + 
+      geom_bar(aes(fill = variable), 
+           stat = "identity", 
+           position = "dodge",
+           width = 0.8) + 
+      geom_line() +
+      labs(x = "Sub-period",
+           y = "??mm",
+           title = "Change in Quinto Water Budget") +
+      scale_fill_brewer(palette="Reds") +
+      theme_cowplot() +
+      annotate(geom = "text", 
+           x = c(1,2,3, 4, 5),  
+           y = c(200,200, -200, 200,200), 
+           label = c("",
+                     "",
+                     "",
+                     "",
+                     ""),
+           size = 3) +
+     geom_hline(yintercept = 0)+
+     geom_vline(xintercept = 1.5)) +
+      theme(
+      axis.ticks.y = element_line(),
+      axis.text.y = element_text(),
+      axis.title.y = element_text(),
+      axis.line.y = element_line(),
+      axis.ticks.x = element_line(),
+      axis.text.x = element_text(),
+      axis.title.x = element_text(),
+      axis.line.x = element_line(),
+      legend.position = "bottom"
+    )
+
+
+# ggsave(filename = "pl3.png",
+#        dpi = 1200, height = 4,
+#        width = 8,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
+```
+
