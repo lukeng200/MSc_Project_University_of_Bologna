@@ -1,0 +1,124 @@
+---
+title: "subsidence"
+author: "SOBOYEJO LUKMAN ADEBOYE"
+date: "20/10/2020"
+output: html_document
+---
+
+
+```{r global_options, include = FALSE}
+knitr::opts_knit$set(echo= FALSE)
+```
+
+## Packages Installed -------------------------------------------------------------------------#
+```{r, warning= FALSE}
+# pkgs <-
+  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape", "cowplot", "imputeTS", "dplyr"))
+# install.packages(pkgs)
+
+library(forecast)   # For the moving avearage timeseries
+library(patchwork)  # For combining plots
+library(ggplot2)    # For Visualization
+library(plotly)     # For interactive plot
+library(lubridate)  #
+library(knitr)
+library(tidyverse)
+library(pander)
+library(ggthemes)
+library(reshape2)
+library(cowplot)
+library(imputeTS)
+library(dplyr)
+```
+
+## Read file into R ---------------------------------------------------------------#
+```{r}
+
+# Monthly Time series
+rm(list=ls(all=TRUE))
+library(RCurl)
+subsidence = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/Subsidence.csv"),
+                  header = T,sep = ",")
+
+```
+
+## Subsidence -----------------------------------------------------------------------------------#
+```{r, warning= FALSE}
+
+## Columns of Subsidence
+ Q <- subsidence[,2]
+ R <- subsidence[,3]
+ S <- subsidence[,4]
+## Adding up in cumulative value
+ Q <- cumsum(subsidence$Q) 
+ R <- cumsum(subsidence$R)
+ S <- cumsum(subsidence$S)
+year <- subsidence$Year
+## Combined into data frame
+ df <- cbind.data.frame(Q, R, S, year)
+
+ 
+ (sub <- ggplot(df) +
+     geom_line(aes(year,
+                   Q,
+                   color = "Quinto_basin"),
+               size = 1.5) +
+     geom_line(aes(year,
+                   S,
+                   color = "S.Vitale_basin"),
+               size = 1.5) +
+     geom_line(aes(year,
+                   R,
+                   color = "Rasponi_basin"),
+               size = 1.5) +
+     labs(
+       x = "Time",
+       y = "Subsidence (mm/year)",
+       title = "Cummulative Subsidence (1972 to 2016)",
+       caption = "",
+       values = c(
+         "Quinto_basin" = "307FE2",
+         "S.Vitale_basin" = "steelblue",
+         "Rasponi_basin" = "#FAAB18"
+       )
+     ) +
+     theme_cowplot() +
+     theme(
+    axis.ticks.y = element_line(),
+    axis.text.y = element_text(),
+    axis.title.y = element_text(),
+    axis.line.y = element_line(),
+    axis.ticks.x = element_line(),
+    axis.text.x = element_text(),
+    axis.title.x = element_text(),
+    axis.line.x = element_line(),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    ) +
+     annotate(
+       geom = "segment",
+       x = 1985,
+       xend = 1974,
+       y = 200,
+       yend = 200,
+       arrow = arrow(type = "closed",
+                     length = unit(2, "mm"))
+     ) +
+     geom_label(
+       aes(x = 1987, y = 200,
+           label = "Anthropogenic"),
+       hjust = 0.5,
+       vjust = 0.5,
+       fill = "white",
+       label.size = NA,
+       size = 4
+     )
+   
+  )
+
+#  ggsave(filename = "sub.png",
+#        dpi = 1200, height = 6,
+#        width = 10,
+#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
+# dev.off()
+```
