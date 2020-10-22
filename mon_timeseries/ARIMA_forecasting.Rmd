@@ -32,7 +32,7 @@ library(dplyr)
 ```
 
 
-## Read file into R ---------------------------------------------------------------#
+## Read file into R ---
 ```{r}
 
 # Monthly Time series
@@ -75,15 +75,251 @@ head(quin.mon)
 ```
 
 
-# San Vitale -----------------------------------------------------------------------#
+# Precipitation ---
+```{r}
+
+# Time Series
+rain_ts = ts(san.mon$p, frequency = 12, start = c(1971,1))
+plot.ts(rain_ts)
+
+# Decomposing time series into trend,seasonality and randomness assuming additive model
+rain_ts_components= decompose(rain_ts, type = "multiplicative")
+plot(rain_ts_components)
+
+# ACF and PACF of data
+# par(mfrow=c(1,3))
+acf(rain_ts, lag.max=20)
+pacf(rain_ts, lag.max=20)
+```
+
+# Building ARIMA model 
+```{r}
+
+# Calculating ndiffs and nsdiffs using forecast
+ndiffs(rain_ts)
+nsdiffs(rain_ts)
+
+# # ACF and PACF plots show trend and seasonility
+# # Performing differences to make the data stationary
+# # calculating "d "for Trend
+# par(mfrow = c(1, 1))
+# rain_ts_diff1 = diff(rain_ts, differences = 1)
+# plot(rain_ts_diff1)
+# 
+# # Checking ACF and PACF for after differencing for above values 
+# par(mfrow=c(1,2))
+# acf(rain_ts_diff1, lag.max=20)
+# pacf(rain_ts_diff1, lag.max=20)
+# 
+# # Performing seasonal differencing and checking for value of D
+# par(mfrow = c(1, 1))
+# rain_ts_seas_diff1 = diff(rain_ts, lag = 12, differences=1)
+# plot(rain_ts_seas_diff1)
+# 
+# # Checking ACF and PACF for seasonally differenced data
+# par(mfrow = c(1, 2))
+# acf(rain_ts_seas_diff1)
+# pacf(rain_ts_seas_diff1)
+
+
+
+```
+
+
+# No Differencing seasonally differenced data again
+```{r}
+
+# Implementing ARIMA model
+# auto.arima(rain_ts)
+model.rain = Arima(rain_ts, order = c(0,0,1),seasonal = c(2,0,2), include.drift = FALSE)
+
+# Checking residuals to ensure they are white noise
+par(mfrow = c(1, 2))
+acf(model.rain$residuals, lag.max = 24)
+pacf(model.rain$residuals, lag.max = 24)
+Box.test(model.rain$residuals, lag=24, type="Ljung-Box")
+
+# Forecasting using Arima model
+par(mfrow = c(1, 1))
+rain_ts_forecast = forecast(model.rain, h= 144)
+plot(rain_ts_forecast)
+
+rain_ts_forecast$mean
+library(pander)
+pander(rain_ts_forecast$mean)
+
+# write.csv(rain_forecast, "D:/HYDRO COMPLEXITY/R software/Github_Learning/MSc_Coastal_Drainage_Analysis-master/MSc_Coastal_Drainage_Analysis/mon_timeseries\\seasonal_rain_forecast.csv")
+
+```
+
+# Actual ET ---
+```{r}
+
+# Time Series
+aet_ts = ts(san.mon$aet, frequency = 12, start = c(1971,1))
+plot.ts(aet_ts)
+
+# Decomposing time series into trend,seasonality and randomness assuming additive model
+aet_ts_components= decompose(aet_ts, type = "additive")
+plot(aet_ts_components)
+
+# ACF and PACF of data
+# par(mfrow=c(1,3))
+plot.ts(aet_ts)
+acf(aet_ts, lag.max=20)
+pacf(aet_ts, lag.max=20)
+```
+
+
+# Building ARIMA model
+```{r}
+
+# Calculating ndiffs and nsdiffs
+ndiffs(aet_ts)
+nsdiffs(aet_ts)
+
+# # ACF and PACF plots show trend and seasonility
+# # Performing differences to make the data stationary
+# # calculating "d "for Trend
+# par(mfrow = c(1, 1))
+# aet_ts_diff1 = diff(aet_ts, differences = 1)
+# plot(aet_ts_diff1)
+# 
+# # Checking ACF and PACF for after differencing for above values 
+# par(mfrow=c(1,2))
+# acf(aet_ts_diff1, lag.max=20)
+# pacf(aet_ts_diff1, lag.max=20)
+
+# Performing seasonal differencing and checking for value of D
+par(mfrow = c(1, 1))
+aet_ts_seas_diff1 = diff(aet_ts, lag = 12, differences = 1)
+plot(aet_ts_seas_diff1)
+
+# Checking ACF and PACF for seasonally differenced data
+par(mfrow = c(1, 2))
+acf(aet_ts_seas_diff1)
+pacf(aet_ts_seas_diff1)
+
+
+```
+
+# Differencing seasonally differenced data again
+```{r}
+
+par(mfrow = c(1, 1))
+aet_seas_diff = diff(aet_ts_seas_diff1, differences=1)
+plot(aet_seas_diff)
+par(mfrow = c(1, 2))
+acf(aet_seas_diff)
+pacf(aet_seas_diff)
+
+# Implementing ARIMA model
+# auto.arima(aet_ts)
+model.aet = Arima(aet_ts, order = c(0,0,2),seasonal = c(1,1,1), include.drift = FALSE)
+
+# Checking residuals to ensure they are white noise
+par(mfrow = c(1, 2))
+acf(model.aet$residuals, lag.max = 24)
+pacf(model.aet$residuals, lag.max = 24)
+Box.test(model.aet$residuals, lag=24, type="Ljung-Box")
+
+# Forecasting using Arima model
+par(mfrow = c(1, 1))
+aet_ts_forecast = forecast(model.aet, h= 144)
+plot(aet_ts_forecast)
+
+aet_ts_forecast$mean
+library(pander)
+pander(aet_ts_forecast$mean)
+```
+
+# Potential ET ---
+```{r}
+# Time Series
+pet_ts = ts(san.mon$pet, frequency = 12, start = c(1971,1))
+plot.ts(pet_ts)
+
+# Decomposing time series into trend,seasonality and randomness assuming additive model
+pet_ts_components= decompose(pet_ts, type = "additive")
+plot(pet_ts_components)
+
+# ACF and PACF of data
+# par(mfrow=c(1,3))
+acf(pet_ts, lag.max=20)
+pacf(pet_ts, lag.max=20)
+```
+
+
+# Building ARIMA model 
+```{r}
+
+# Calculating ndiffs and nsdiffs
+ndiffs(pet_ts)
+nsdiffs(pet_ts)
+
+# # ACF and PACF plots show trend and seasonility
+# # Performing differences to make the data stationary
+# # calculating "d "for Trend
+# par(mfrow = c(1, 1))
+# pet_ts_diff1 = diff(pet_ts, differences = 1)
+# plot(pet_ts_diff1)
+# 
+# # Checking ACF and PACF for after differencing for above values 
+# par(mfrow=c(1,2))
+# acf(pet_ts_diff1, lag.max=20)
+# pacf(pet_ts_diff1, lag.max=20)
+
+# Performing seasonal differencing and checking for value of D
+par(mfrow = c(1, 1))
+pet_ts_seas_diff1 = diff(pet_ts, lag = 12, differences=1)
+plot(pet_ts_seas_diff1)
+
+# Checking ACF and PACF for seasonally differenced data
+par(mfrow = c(1, 2))
+acf(pet_ts_seas_diff1)
+pacf(pet_ts_seas_diff1)
+```
+
+# Differencing seasonaaly differenced data again
+```{r}
+par(mfrow = c(1, 1))
+pet_seas_diff <- diff(pet_ts_seas_diff1, differences = 1)
+plot(pet_seas_diff)
+par(mfrow = c(1, 2))
+acf(pet_seas_diff)
+pacf(pet_seas_diff)
+
+# Implementing ARIMA model
+# auto.arima(pet_ts)
+pet.model <- Arima(pet_ts, order = c(1,0,0),seasonal = c(2,1,2), include.drift = FALSE)
+
+# Checking residuals to ensure they are white noise
+par(mfrow = c(1, 2))
+acf(pet.model$residuals, lag.max = 24)
+pacf(pet.model$residuals, lag.max = 24)
+Box.test(pet.model$residuals, lag=24, type="Ljung-Box")
+
+# Forecasting using Arima model
+par(mfrow = c(1, 1))
+pet_ts_forecast = forecast(pet.model, h= 144)
+plot(pet_ts_forecast)
+
+pet_ts_forecast$mean
+library(pander)
+pander(pet_ts_forecast$mean)
+```
+
+
+# San Vitale ---
 ```{r}
 # Time Series
 san_ts = ts(san.mon$pu, frequency = 12, start = c(1971,1))
 
 # imputeTS: Time Series Missing Value; Imputation in R by Steffen Moritz and Thomas Bartz-Beielstein
 san_ts.imp <- na_kalman(san_ts)
-ggplot_na_imputations(san_ts, san_ts.imp) + theme_cowplot()
+san_imp <- ggplot_na_imputations(san_ts, san_ts.imp) + theme_cowplot()
 plot.ts(san_ts.imp)
+san_imp
 
 # Decomposing time series into trend,seasonality and randomness assuming multiplicative model
 san_ts_components= decompose(san_ts.imp, type = "additive")
@@ -91,13 +327,16 @@ plot(san_ts_components)
 
 # ACF and PACF of data
 # par(mfrow=c(1,3))
-plot.ts(san_ts.imp)
 acf(san_ts.imp, lag.max=20)
 pacf(san_ts.imp, lag.max=20)
 ```
 
-#---------Building ARIMA model ------------------------------------------------------#
+# Building ARIMA model 
 ```{r}
+
+# Calculating ndiffs and nsdiffs
+ndiffs(san_ts.imp)
+nsdiffs(san_ts.imp)
 
 # ACF and PACF plots show trend and seasonility
 # Performing differences to make the data stationary
@@ -111,52 +350,52 @@ par(mfrow=c(1,2))
 acf(san_ts_diff1, lag.max=20)
 pacf(san_ts_diff1, lag.max=20)
 
-# Performing seasonal differencing and checking for value of D
-par(mfrow = c(1, 1))
-san_ts_seas_diff1=diff(san_ts.imp, lag = 12, differences=1)
-plot(san_ts_seas_diff1)
+# # Performing seasonal differencing and checking for value of D
+# par(mfrow = c(1, 1))
+# san_ts_seas_diff1 = diff(san_ts.imp, lag = 12, differences = 1)
+# plot(san_ts_seas_diff1)
+# 
+# # Checking ACF and PACF for seasonally differenced data
+# par(mfrow = c(1, 2))
+# acf(san_ts_seas_diff1)
+# pacf(san_ts_seas_diff1)
 
-# Checking ACF and PACF for seasonally differenced data
-par(mfrow = c(1, 2))
-acf(san_ts_seas_diff1)
-pacf(san_ts_seas_diff1)
-
-# Calculating ndiffs and nsdiffs
-ndiffs(san_ts.imp)
-nsdiffs(san_ts.imp)
 
 ```
 
-#------Differencing seasonaaly differenced data again--------------#
+# No Differencing seasonally differenced data again
 ```{r}
 
-par(mfrow = c(1, 1))
-seas_diff=diff(san_ts_seas_diff1, differences=1)
-plot(seas_diff)
-par(mfrow = c(1, 2))
-acf(seas_diff)
-pacf(seas_diff)
+# par(mfrow = c(1, 1))
+# san_seas_diff = diff(san_ts_seas_diff1, differences=1)
+# plot(san_seas_diff)
+# par(mfrow = c(1, 2))
+# acf(san_seas_diff)
+# pacf(san_seas_diff)
 
 # Implementing ARIMA model
 # auto.arima(san_ts.imp)
-model= Arima(san_ts.imp, order = c(1,1,1),seasonal = c(0,1,1), include.drift = FALSE)
+san.model= Arima(san_ts.imp, order = c(1,1,1),seasonal = c(1,0,1), include.drift = FALSE)
 
 # Checking residuals to ensure they are white noise
 par(mfrow = c(1, 2))
-acf(model$residuals, lag.max = 24)
-pacf(model$residuals, lag.max = 24)
-Box.test(model$residuals, lag=24, type="Ljung-Box")
+acf(san.model$residuals, lag.max = 24)
+pacf(san.model$residuals, lag.max = 24)
+Box.test(san.model$residuals, lag=24, type="Ljung-Box")
 
 # Forecasting using Arima model
 par(mfrow = c(1, 1))
-data_ts_forecast=forecast(model,h= 100)
-plot(data_ts_forecast)
+san_ts_forecast=forecast(san.model,h= 144)
+plot(san_ts_forecast)
 
-data_ts_forecast$mean
+san_ts_forecast$mean
+library(pander)
+pander(san_ts_forecast$mean)
+
 ```
 
 
-# Rasponi -----------------------------------------------------------------------#
+# Rasponi ----
 ```{r}
 # Time Series
 ras_ts = ts(ras.mon$pu, frequency = 12, start = c(1971,1))
@@ -166,96 +405,93 @@ ras_ts.imp <- na_kalman(ras_ts)
 ggplot_na_imputations(ras_ts, ras_ts.imp) + theme_cowplot()
 plot.ts(ras_ts.imp)
 
-# Decomposing time series into trend,seasonality and randomness assuming multiplicative model
+# Decomposing time series into trend,seasonality and randomness assuming additive model
 ras_ts_components= decompose(ras_ts.imp, type = "additive")
 plot(ras_ts_components)
 
 # ACF and PACF of data
 # par(mfrow=c(1,3))
-plot.ts(ras_ts.imp)
 acf(ras_ts.imp, lag.max=20)
 pacf(ras_ts.imp, lag.max=20)
 ```
 
-#---------Building ARIMA model ------------------------------------------------------#
+# Building ARIMA model 
 ```{r}
-
-# ACF and PACF plots show trend and seasonility
-# Performing differences to make the data stationary
-# calculating "d "for Trend
-par(mfrow = c(1, 1))
-ras_ts_diff1 = diff(ras_ts.imp, differences = 1)
-plot(ras_ts_diff1)
-
-# Checking ACF and PACF for after differencing for above values 
-par(mfrow=c(1,2))
-acf(ras_ts_diff1, lag.max=20)
-pacf(ras_ts_diff1, lag.max=20)
-
-# Performing seasonal differencing and checking for value of D
-par(mfrow = c(1, 1))
-ras_ts_seas_diff1=diff(ras_ts.imp, lag = 12, differences=1)
-plot(ras_ts_seas_diff1)
-
-# Checking ACF and PACF for seasonally differenced data
-par(mfrow = c(1, 2))
-acf(ras_ts_seas_diff1)
-pacf(ras_ts_seas_diff1)
 
 # Calculating ndiffs and nsdiffs
 ndiffs(ras_ts.imp)
 nsdiffs(ras_ts.imp)
 
+# # ACF and PACF plots show trend and seasonility
+# # Performing differences to make the data stationary
+# # calculating "d "for Trend
+# par(mfrow = c(1, 1))
+# ras_ts_diff1 = diff(ras_ts.imp, differences = 1)
+# plot(ras_ts_diff1)
+# 
+# # Checking ACF and PACF for after differencing for above values 
+# par(mfrow=c(1,2))
+# acf(ras_ts_diff1, lag.max=20)
+# pacf(ras_ts_diff1, lag.max=20)
+# 
+# # Performing seasonal differencing and checking for value of D
+# par(mfrow = c(1, 1))
+# ras_ts_seas_diff1=diff(ras_ts.imp, lag = 12, differences=1)
+# plot(ras_ts_seas_diff1)
+# 
+# # Checking ACF and PACF for seasonally differenced data
+# par(mfrow = c(1, 2))
+# acf(ras_ts_seas_diff1)
+# pacf(ras_ts_seas_diff1)
+
 ```
 
-#------Differencing seasonaaly differenced data again--------------#
+# No Differencing seasonaaly differenced data again
 ```{r}
 
-par(mfrow = c(1, 1))
-seas_diff=diff(ras_ts_seas_diff1, differences=1)
-plot(seas_diff)
-par(mfrow = c(1, 2))
-acf(seas_diff)
-pacf(seas_diff)
-
 # Implementing ARIMA model
-auto.arima(ras_ts.imp)
-model= Arima(ras_ts.imp, order = c(4,0,0),seasonal = c(0,1,1), include.drift = FALSE)
+# auto.arima(ras_ts.imp)
+ras.model= Arima(ras_ts.imp, order = c(4,0,0),seasonal = c(1,0,1), include.drift = FALSE)
 
 # Checking residuals to ensure they are white noise
 par(mfrow = c(1, 2))
-acf(model$residuals, lag.max = 24)
-pacf(model$residuals, lag.max = 24)
-Box.test(model$residuals, lag=24, type="Ljung-Box")
+acf(ras.model$residuals, lag.max = 24)
+pacf(ras.model$residuals, lag.max = 24)
+Box.test(ras.model$residuals, lag=24, type="Ljung-Box")
 
 # Forecasting using Arima model
 par(mfrow = c(1, 1))
-data_ts_forecast=forecast(model,h= 100)
-plot(data_ts_forecast)
+ras_ts_forecast=forecast(ras.model,h= 144)
+plot(ras_ts_forecast)
 
-data_ts_forecast$mean
+ras_ts_forecast$mean
+library(pander)
+pander(ras_ts_forecast$mean)
 ```
 
 
-# Quinto -----------------------------------------------------------------------#
+# Quinto ---
 ```{r}
 # Time Series
 quin_ts = ts(quin.mon$pu, frequency = 12, start = c(1971,1))
 plot.ts(quin_ts)
 
-# Decomposing time series into trend,seasonality and randomness assuming multiplicative model
+# Decomposing time series into trend,seasonality and randomness assuming additive model
 quin_ts_components= decompose(quin_ts, type = "additive")
 plot(quin_ts_components)
 
 # ACF and PACF of data
 # par(mfrow=c(1,3))
-plot.ts(quin_ts)
 acf(quin_ts, lag.max=20)
 pacf(quin_ts, lag.max=20)
 ```
 
-#---------Building ARIMA model ------------------------------------------------------#
+# Building ARIMA model
 ```{r}
+
+# Calculating ndiffs and nsdiffs
+ndiffs(quin_ts)
+nsdiffs(quin_ts)
 
 # ACF and PACF plots show trend and seasonility
 # Performing differences to make the data stationary
@@ -269,46 +505,45 @@ par(mfrow=c(1,2))
 acf(quin_ts_diff1, lag.max=20)
 pacf(quin_ts_diff1, lag.max=20)
 
-# Performing seasonal differencing and checking for value of D
-par(mfrow = c(1, 1))
-quin_ts_seas_diff1=diff(quin_ts, lag = 12, differences=1)
-plot(quin_ts_seas_diff1)
+# # Performing seasonal differencing and checking for value of D
+# par(mfrow = c(1, 1))
+# quin_ts_seas_diff1 = diff(quin_ts, lag = 12, differences=1)
+# plot(quin_ts_seas_diff1)
+# 
+# # Checking ACF and PACF for seasonally differenced data
+# par(mfrow = c(1, 2))
+# acf(quin_ts_seas_diff1)
+# pacf(quin_ts_seas_diff1)
 
-# Checking ACF and PACF for seasonally differenced data
-par(mfrow = c(1, 2))
-acf(quin_ts_seas_diff1)
-pacf(quin_ts_seas_diff1)
-
-# Calculating ndiffs and nsdiffs
-ndiffs(quin_ts)
-nsdiffs(quin_ts)
 
 ```
 
-#------Differencing seasonaaly differenced data again--------------#
+# No Differencing seasonally differenced data again
 
 ```{r}
-par(mfrow = c(1, 1))
-seas_diff = diff(quin_ts_seas_diff1, differences=1)
-plot(seas_diff)
-par(mfrow = c(1, 2))
-acf(seas_diff)
-pacf(seas_diff)
+# par(mfrow = c(1, 1))
+# quin_seas_diff = diff(quin_ts_seas_diff1, differences=1)
+# plot(quin_seas_diff)
+# par(mfrow = c(1, 2))
+# acf(quin_seas_diff)
+# pacf(quin_seas_diff)
 
 # Implementing ARIMA model
-# auto.arima(quin_ts.imp)
-model= Arima(quin_ts, order = c(1,1,1),seasonal = c(1,0,1), include.drift = FALSE)
+# auto.arima(quin_ts)
+quin.model <- Arima(quin_ts, order = c(1,1,1),seasonal = c(1,0,1), include.drift = FALSE)
 
 # Checking residuals to ensure they are white noise
 par(mfrow = c(1, 2))
-acf(model$residuals, lag.max = 24)
-pacf(model$residuals, lag.max = 24)
-Box.test(model$residuals, lag=24, type="Ljung-Box")
+acf(quin.model$residuals, lag.max = 24)
+pacf(quin.model$residuals, lag.max = 24)
+Box.test(quin.model$residuals, lag=24, type="Ljung-Box")
 
 # Forecasting using Arima model
 par(mfrow = c(1, 1))
-data_ts_forecast=forecast(model,h= 100)
-plot(data_ts_forecast)
+quin_ts_forecast <- forecast(quin.model, h= 144)
+plot(quin_ts_forecast)
 
-data_ts_forecast$mean
+quin_ts_forecast$mean
+library(pander)
+pander(quin_ts_forecast$mean)
 ```
