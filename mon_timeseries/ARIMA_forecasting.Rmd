@@ -1,5 +1,5 @@
 ---
-title: "monthly_forecasting"
+title: "ARIMA_Seasonal_Forecasting"
 author: "SOBOYEJO LUKMAN ADEBOYE"
 date: "01/06/2020"
 output: word_document
@@ -44,8 +44,8 @@ san.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng2
 san.parse.date <- mutate(san.mon.data, parse.date = parse_date_time(year, "by"))
 san.newdate <- mutate(san.parse.date, newdate = as.Date(parse.date))
 san.mon <- mutate(san.newdate, year = as.POSIXlt(newdate)$year + 1900)
-str(san.mon)
-head(san.mon)
+# str(san.mon)
+# head(san.mon)
 
 
 # Rasponi Basin Data
@@ -55,8 +55,8 @@ ras.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng2
 ras.parse.date <- mutate(ras.mon.data, parse.date = parse_date_time(year, "by"))
 ras.newdate <- mutate(ras.parse.date, newdate = as.Date(parse.date))
 ras.mon <- mutate(ras.newdate, year = as.POSIXlt(newdate)$year + 1900)
-str(ras.mon)
-head(ras.mon)
+# str(ras.mon)
+# head(ras.mon)
 
 
 
@@ -67,8 +67,8 @@ quin.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng
 quin.parse.date <- mutate(quin.mon.data, parse.date = parse_date_time(year, "by"))
 quin.newdate <- mutate(quin.parse.date, newdate = as.Date(parse.date))
 quin.mon <- mutate(quin.newdate, year = as.POSIXlt(newdate)$year + 1900)
-str(quin.mon)
-head(quin.mon)
+# str(quin.mon)
+# head(quin.mon)
 
 # # kable()
 # # pander()
@@ -133,6 +133,8 @@ nsdiffs(rain_ts)
 # auto.arima(rain_ts)
 model.rain = Arima(rain_ts, order = c(0,0,1),seasonal = c(2,0,2), include.drift = FALSE)
 
+library(forecast)
+forecast(model.rain)
 # Checking residuals to ensure they are white noise
 par(mfrow = c(1, 2))
 acf(model.rain$residuals, lag.max = 24)
