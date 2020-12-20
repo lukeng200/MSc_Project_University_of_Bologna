@@ -13,7 +13,7 @@ knitr::opts_knit$set(echo= FALSE)
 ## Packages Installed -------------------------------------------------------------------------#
 ```{r, warning= FALSE}
 # pkgs <-
-  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape", "cowplot", "imputeTS", "dplyr"))
+  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape2" "reshape", "cowplot", "imputeTS", "dplyr"))
 # install.packages(pkgs)
 
 library(forecast)   # For the moving avearage timeseries
@@ -97,6 +97,7 @@ head(san.ann.p)
        title = "Annual Rainfall",
        subtitle = "Representing the three coastal basins",
        tag = "a") +
+  # library(cowplot)
    theme_cowplot()+
     theme(
       axis.ticks.y = element_line(),
@@ -129,6 +130,8 @@ head(san.ann.p)
       yend = c(600,780),
       curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
   )
+
+ggplotly(rain.ann)
 
 # ggsave(filename = "rain.ann.png",
 #        dpi = 1200, height = 4,
@@ -181,7 +184,7 @@ head(san.ann.aet)
       geom = "text",
       x = c(2007,2021),
       y = c(610, 550),
-      label = c("?? time (1997-2006)","??P"),
+      label = c("?? time (1997-2006)","??AET"),
       hjust = "middle",
       color = "#BB2D05") +
     annotate(
@@ -192,12 +195,12 @@ head(san.ann.aet)
       yend = c(590,505),
       curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
   )
-# 
-# ggsave(filename = "aet.ann.pump.png",
-#        dpi = 1200, height = 4,
-#        width = 10,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-# dev.off()
+
+ggsave(filename = "aet.ann.png",
+       dpi = 1200, height = 4,
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 
@@ -207,7 +210,7 @@ head(san.ann.aet)
 san.ann.data <- group_by(san.mon, year)
 san.ann.pet <- summarise(san.ann.data, pet = sum(pet, na.rm = TRUE))
 
-(ras.ann.pump <- ggplot(data = san.ann.pet, 
+(ann.pet <- ggplot(data = san.ann.pet, 
               mapping = aes(x = year, y = pet)) +
     geom_line() + 
    geom_smooth(method = "loess", 
@@ -217,9 +220,10 @@ san.ann.pet <- summarise(san.ann.data, pet = sum(pet, na.rm = TRUE))
               se = TRUE, 
               na.rm = FALSE) +
     labs(x = "Time", 
-       y = "Pu (mmyr)", 
-       title = "Rasponi Basin (Annual Pumping)",
-       tag = "b") +
+       y = "PET (mmyr)", 
+       title = "Potentail Evapotranspiration",
+       subtitle = "Obtained using Thornthwaite Method (1948)", 
+       tag = "c") +
    theme_cowplot() +
    theme(
       axis.ticks.y = element_line(),
@@ -229,32 +233,33 @@ san.ann.pet <- summarise(san.ann.data, pet = sum(pet, na.rm = TRUE))
       axis.ticks.x = element_line(),
       axis.text.x = element_text(),
       axis.title.x = element_text(),
-      axis.line.x = element_line()) 
-)
-  #  annotate(
-  #    "segment",
-  #    x = c(2007, 2018),
-  #    xend = c(2021, 2021),
-  #    y = c(146.05,251.89),
-  #    yend = c(146.05,251.89),
-  #    linetype = "dashed") +
-  #   annotate(
-  #     geom = "text",
-  #     x = c(2015,2023),
-  #     y = c(120, 200),
-  #     label = c("??time (2007 - 2018)","??P"),
-  #     hjust = "middle",
-  #     color = "#BB2D05") +
-  #   annotate(
-  #     geom = "curve",
-  #     x = c(2021,2021),
-  #     y = c(155,155),
-  #     xend = c(2021,2021),
-  #     yend = c(146,251),
-  #     curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
-  # )
-  
-# ggsave(filename = "ras.ann.pump.png",
+      axis.line.x = element_line()) +
+   annotate(
+     "segment",
+     x = c(2007, 2018),
+     xend = c(2021, 2021),
+     y = c(873.9,920.2),
+     yend = c(873.9,920.2),
+     linetype = "dashed") +
+    annotate(
+      geom = "text",
+      x = c(2015,2023),
+      y = c(950, 900.9),
+      label = c("??time (2007 - 2018)","??PET"),
+      hjust = "middle",
+      color = "#BB2D05") +
+    annotate(
+      geom = "curve",
+      x = c(2021,2021),
+      y = c(920.2,873.9),
+      xend = c(2021,2021),
+      yend = c(873.9,920.2),
+      curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
+  )
+
+ggplotly(ann.pet)
+
+# ggsave(filename = "ann.pet.png",
 #        dpi = 1200, height = 4,
 #        width = 10,
 #        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
@@ -279,8 +284,8 @@ san.ann.pu <- summarise(san.ann.data, pu = sum(pu, na.rm = FALSE))
               se = TRUE, 
               na.rm = FALSE) +
    labs(x = "Time", 
-       y = "pu (mm/yr)", 
-       title = "San Vitale Basin - Annual Pumping",
+       y = "Pu (mm/yr)", 
+       title = "San Vitale Basin (Annual Pumping)",
        tag = "a") +
    theme(
       axis.ticks.y = element_line(),
@@ -296,14 +301,14 @@ san.ann.pu <- summarise(san.ann.data, pu = sum(pu, na.rm = FALSE))
      "segment",
      x = c(2007, 2018),
      xend = c(2021, 2021),
-     y = c(315.06,125.87),
-     yend = c(315.06,125.87),
+     y = c(341.06,195.87),
+     yend = c(341.06,195.87),
      linetype = "dashed") +
     annotate(
       geom = "text",
       x = c(2015,2023),
       y = c(400, 250),
-      label = c("??time (2007 - 2018)","??P"),
+      label = c("??time (2007 - 2018)","??Pu"),
       hjust = "middle",
       color = "#BB2D05") +
     annotate(
@@ -311,16 +316,16 @@ san.ann.pu <- summarise(san.ann.data, pu = sum(pu, na.rm = FALSE))
       x = c(2021,2021),
       y = c(290,290),
       xend = c(2021,2021),
-      yend = c(315,125.87),
+      yend = c(341,195.87),
       curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
   )
   
-
-# ggsave(filename = "san.ann.pump.png",
-#        dpi = 1200, height = 4,
-#        width = 10,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-# dev.off()
+ggplotly(san.ann.pump)
+ggsave(filename = "san.ann.pump.png",
+       dpi = 1200, height = 4,
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 # Annual Rasponi Pumping
@@ -364,7 +369,7 @@ ras.ann.pu <- summarise(ras.ann.data, pu = sum(pu, na.rm = FALSE))
       geom = "text",
       x = c(2015,2023),
       y = c(120, 200),
-      label = c("??time (2007 - 2018)","??P"),
+      label = c("??time (2007 - 2018)","??Pu"),
       hjust = "middle",
       color = "#BB2D05") +
     annotate(
@@ -376,6 +381,7 @@ ras.ann.pu <- summarise(ras.ann.data, pu = sum(pu, na.rm = FALSE))
       curvature = 0.0, arrow = arrow(length = unit(2, "mm")))
   )
   
+ggplotly(ras.ann.pump)
 # ggsave(filename = "ras.ann.pump.png",
 #        dpi = 1200, height = 4,
 #        width = 10,
@@ -425,7 +431,7 @@ quin.ann.pu <- summarise(quin.ann.data, pu = sum(pu, na.rm = TRUE))
      geom = "text",
      x = c(2015, 2023),
      y = c(190,260),
-     label = c("??time (2007-2018)", "??P"),
+     label = c("??time (2007-2018)", "??Pu"),
      hjust = "middle",
      color = "#BB2D05"
    ) +
@@ -439,7 +445,8 @@ quin.ann.pu <- summarise(quin.ann.data, pu = sum(pu, na.rm = TRUE))
      arrow = arrow(length = unit(2, "mm"))
    )
 )
-  
+
+ggplotly(quin.ann.pump)
 
 # ggsave(filename = "quin.ann.pump.png",
 #        dpi = 1200, height = 4,
