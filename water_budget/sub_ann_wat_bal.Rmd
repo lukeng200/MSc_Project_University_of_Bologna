@@ -58,7 +58,7 @@ df1 <- melt(water_budget[,c("Sub_period",
            stat = "identity", 
            position = "dodge",
            width = 0.8) + 
-      geom_line() +
+      # geom_line() +
       labs(x = "Sub-period",
            y = "??mm",
            title = "Change in San Vitale Water Budget") +
@@ -85,17 +85,17 @@ df1 <- melt(water_budget[,c("Sub_period",
       axis.text.x = element_text(),
       axis.title.x = element_text(),
       axis.line.x = element_line(),
-      legend.position = "bottom"
+      legend.position = "false"
     )
 
 
 # ggplotly(aet)
+dev.off()
+ggsave(filename = "pl1.png",
+       dpi = 1200, height = 4,
+       width = 8,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
 
-# ggsave(filename = "pl1.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
 ```
 
 ## Rasponi Water Budget ------------------------------------------------------------------------#
@@ -112,7 +112,7 @@ df2 <- melt(water_budget[,c("Sub_period",
            stat = "identity", 
            position = "dodge",
            width = 0.8) + 
-      geom_line() +
+      # geom_line() +
       labs(x = "Sub-period",
            y = "??mm",
            title = "Change in Rasponi Water Budget") +
@@ -138,15 +138,15 @@ df2 <- melt(water_budget[,c("Sub_period",
       axis.text.x = element_text(),
       axis.title.x = element_text(),
       axis.line.x = element_line(),
-      legend.position = "bottom"
+      legend.position = "false"
     )
 
 
-# ggsave(filename = "pl2.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "pl2.png",
+       dpi = 1200, height = 4,
+       width = 8,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Quinto Water Budget -------------------------------------------------------------------------#
@@ -159,11 +159,11 @@ df3 <- melt(water_budget[,c("Sub_period",
 (pl3 <- ggplot(df3,
                 aes(x = Sub_period,
                     y =value)) + 
-      geom_bar(aes(fill = variable), 
+      geom_bar(aes(fill = variable),
            stat = "identity", 
            position = "dodge",
            width = 0.8) + 
-      geom_line() +
+      # geom_line() +
       labs(x = "Sub-period",
            y = "??mm",
            title = "Change in Quinto Water Budget") +
@@ -192,11 +192,10 @@ df3 <- melt(water_budget[,c("Sub_period",
       legend.position = "bottom"
     )
 
-
-# ggsave(filename = "pl3.png",
-#        dpi = 1200, height = 4,
-#        width = 8,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Plot")
-# dev.off()
+ggsave(filename = "pl3.png",
+       dpi = 1200, height = 4,
+       width = 8,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 

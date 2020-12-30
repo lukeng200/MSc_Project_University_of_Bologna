@@ -13,7 +13,7 @@ knitr::opts_knit$set(echo= FALSE)
 ## Packages Installed -------------------------------------------------------------------------#
 ```{r, warning= FALSE}
 # pkgs <-
-  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape2" "reshape", "cowplot", "imputeTS", "dplyr"))
+  (c("forecast", "patchwork", "ggplot2", "plotly", "tidyverse", "pander", "ggthemes", "reshape2", "cowplot", "imputeTS", "dplyr"))
 # install.packages(pkgs)
 
 library(forecast)   # For the moving avearage timeseries
@@ -93,7 +93,7 @@ head(san.ann.p)
               se = TRUE, 
               na.rm = FALSE)+
   labs(x = "Time", 
-       y = "P (mm/yr)", 
+       y = "P (mm/year)", 
        title = "Annual Rainfall",
        subtitle = "Representing the three coastal basins",
        tag = "a") +
@@ -133,11 +133,11 @@ head(san.ann.p)
 
 ggplotly(rain.ann)
 
-# ggsave(filename = "rain.ann.png",
-#        dpi = 1200, height = 4,
-#        width = 10,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-# dev.off()
+ggsave(filename = "rain.ann.png",
+       dpi = 1200, height = 4,
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 
 ```
 
@@ -159,7 +159,7 @@ head(san.ann.aet)
               level = 0.95, se = TRUE, 
               na.rm = FALSE) +
   labs(x = "Time", 
-       y = "AET (mm/yr)", 
+       y = "AET (mm/year)", 
        title = "Actual Evapotranspiration",
        subtitle = "Obtained using Thornthwaite Mather procedure (1957)", 
        tag = "b") +
@@ -220,7 +220,7 @@ san.ann.pet <- summarise(san.ann.data, pet = sum(pet, na.rm = TRUE))
               se = TRUE, 
               na.rm = FALSE) +
     labs(x = "Time", 
-       y = "PET (mmyr)", 
+       y = "PET (mm/year)", 
        title = "Potentail Evapotranspiration",
        subtitle = "Obtained using Thornthwaite Method (1948)", 
        tag = "c") +
@@ -259,11 +259,11 @@ san.ann.pet <- summarise(san.ann.data, pet = sum(pet, na.rm = TRUE))
 
 ggplotly(ann.pet)
 
-# ggsave(filename = "ann.pet.png",
-#        dpi = 1200, height = 4,
-#        width = 10,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-# dev.off()
+ggsave(filename = "ann.pet.png",
+       dpi = 1200, height = 4,
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 
 
 ```
@@ -284,7 +284,7 @@ san.ann.pu <- summarise(san.ann.data, pu = sum(pu, na.rm = FALSE))
               se = TRUE, 
               na.rm = FALSE) +
    labs(x = "Time", 
-       y = "Pu (mm/yr)", 
+       y = "Pu (mm/year)", 
        title = "San Vitale Basin (Annual Pumping)",
        tag = "a") +
    theme(
@@ -345,7 +345,7 @@ ras.ann.pu <- summarise(ras.ann.data, pu = sum(pu, na.rm = FALSE))
               se = TRUE, 
               na.rm = FALSE)+
     labs(x = "Time", 
-       y = "Pu (mmyr)", 
+       y = "Pu (mm/year)", 
        title = "Rasponi Basin (Annual Pumping)",
        tag = "b") +
    theme_cowplot() +
@@ -382,11 +382,11 @@ ras.ann.pu <- summarise(ras.ann.data, pu = sum(pu, na.rm = FALSE))
   )
   
 ggplotly(ras.ann.pump)
-# ggsave(filename = "ras.ann.pump.png",
-#        dpi = 1200, height = 4,
-#        width = 10,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-# dev.off()
+ggsave(filename = "ras.ann.pump.png",
+       dpi = 1200, height = 4,
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 
 ```
 
@@ -406,7 +406,7 @@ quin.ann.pu <- summarise(quin.ann.data, pu = sum(pu, na.rm = TRUE))
               se = TRUE, 
               na.rm = FALSE) +
     labs(x = "Time", 
-       y = "Pu (mm/yr)", 
+       y = "Pu (mm/year)", 
        title = "Quinto Basin (Annual Pumping)",
        tag = "c") +
    theme_cowplot() +
@@ -448,9 +448,9 @@ quin.ann.pu <- summarise(quin.ann.data, pu = sum(pu, na.rm = TRUE))
 
 ggplotly(quin.ann.pump)
 
-# ggsave(filename = "quin.ann.pump.png",
-#        dpi = 1200, height = 4,
-#        width = 10,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-# dev.off()
+ggsave(filename = "quin.ann.pump.png",
+       dpi = 1200, height = 4,
+       width = 10,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
