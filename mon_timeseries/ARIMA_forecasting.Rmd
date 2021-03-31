@@ -38,7 +38,7 @@ library(dplyr)
 # Monthly Time series
 rm(list=ls(all=TRUE))
 library(RCurl)
-san.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/san.mon.csv"),
+san.mon.data = read.table("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/san.mon.csv",
                   header = T,sep = ",")
 # Date Conversion to POSXCIT
 san.parse.date <- mutate(san.mon.data, parse.date = parse_date_time(year, "by"))
@@ -49,7 +49,7 @@ san.mon <- mutate(san.newdate, year = as.POSIXlt(newdate)$year + 1900)
 
 
 # Rasponi Basin Data
-ras.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/ras.mon.csv"),
+ras.mon.data = read.table("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/ras.mon.csv",
                   header = T,sep = ",")
 # Date Conversion to POSXCIT
 ras.parse.date <- mutate(ras.mon.data, parse.date = parse_date_time(year, "by"))
@@ -61,7 +61,7 @@ ras.mon <- mutate(ras.newdate, year = as.POSIXlt(newdate)$year + 1900)
 
 
 # Quinto Basin Data
-quin.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/quin.mon.csv"),
+quin.mon.data = read.table("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/quin.mon.csv",
                   header = T,sep = ",")
 # Date Conversion to POSXCIT
 quin.parse.date <- mutate(quin.mon.data, parse.date = parse_date_time(year, "by"))
