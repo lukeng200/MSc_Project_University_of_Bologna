@@ -37,7 +37,7 @@ library(dplyr)
 # Monthly Time series
 rm(list=ls(all=TRUE))
 library(RCurl)
-san.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/san.mon.csv"),
+san.mon.data = read.table("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/san.mon.csv",
                   header = T,sep = ",")
 # Date Conversion to POSXCIT
 san.parse.date <- mutate(san.mon.data, parse.date = parse_date_time(year, "by"))
@@ -48,7 +48,7 @@ head(san.mon)
 
 
 # Rasponi Basin Data
-ras.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/ras.mon.csv"),
+ras.mon.data = read.table("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/ras.mon.csv",
                   header = T,sep = ",")
 # Date Conversion to POSXCIT
 ras.parse.date <- mutate(ras.mon.data, parse.date = parse_date_time(year, "by"))
@@ -60,7 +60,7 @@ head(ras.mon)
 
 
 # Quinto Basin Data
-quin.mon.data = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/quin.mon.csv"),
+quin.mon.data = read.table("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/quin.mon.csv",
                   header = T,sep = ",")
 # Date Conversion to POSXCIT
 quin.parse.date <- mutate(quin.mon.data, parse.date = parse_date_time(year, "by"))
@@ -1203,10 +1203,11 @@ season.pup$Month = factor(season.pup$Month, levels = month.abb)
                       fill = Month, 
                       class = Month)) +
     # Specify the geom to be boxplot
-    geom_boxplot(show.legend = TRUE) +
+    geom_boxplot(show.legend = FALSE) +
     labs(x = "Month",
          y = "Pu/P",
-         title = "Pumping Ratio / Precipitation") +
+         title = "Quinto (Pumping / Precipitation Ratio)",
+         tag = "b") +
     scale_y_continuous(limits = c(0, 2)) +
   season.summary()+
     theme_cowplot()
@@ -1238,11 +1239,11 @@ season.pup$Month = factor(season.pup$Month, levels = month.abb)
 #     )
  )
 
-# ggsave(filename = "quin_pup.png",
-#        dpi = 1200, height = 4,
-#        width = 6,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-# dev.off()
+ggsave(filename = "quin_pup.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 
 ## Quinto Infiltration
@@ -1377,16 +1378,16 @@ season.dS$Month = factor(season.dS$Month, levels = month.abb)
     geom_boxplot() +
     labs(x = "Month",
          y = "??S (mm/month)",
-         title = "Change in Water Storage",
+         title = "Quinto (?? in Water Storage)",
          tag = "d") +
     season.summary()+
     theme_cowplot()
 )
 
-# ggsave(filename = "quin_dS.png",
-#        dpi = 1200, height = 4,
-#        width = 6,
-#        path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
-# dev.off()
+ggsave(filename = "quin_dS.png",
+       dpi = 1200, height = 4,
+       width = 6,
+       path = "D:/Bologna Project/Land_Reclamation_Excel_Data/Project_Manuscript/Presentation")
+dev.off()
 ```
 

@@ -39,7 +39,7 @@ rm(list=ls(all=TRUE))
 library(RCurl)
 
 # Sub period water balance
-water_budget = read.table(text=getURL("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/sub_ann_wat_bal.csv"),
+water_budget = read.table("https://raw.githubusercontent.com/lukeng200/MSc_Coastal_Drainage_Analysis/master/data_csv/sub_ann_wat_bal.csv",
                   header = T,sep = ",")
 head(water_budget)
 ```
@@ -61,9 +61,10 @@ df1 <- melt(water_budget[,c("Sub_period",
       # geom_line() +
       labs(x = "Sub-period",
            y = "??mm",
-           title = "Change in San Vitale Water Budget") +
+           title = "Change in San Vitale Water Budget", 
+           tag = "a") +
     theme_cowplot() +
-      scale_fill_brewer(palette="Reds") +
+      scale_fill_brewer(palette= "Set1") +
       theme_cowplot() +
       annotate(geom = "text", 
            x = c(1,2,3, 4, 5),  
@@ -89,7 +90,7 @@ df1 <- melt(water_budget[,c("Sub_period",
     )
 
 
-# ggplotly(aet)
+ggplotly(pl1)
 dev.off()
 ggsave(filename = "pl1.png",
        dpi = 1200, height = 4,
@@ -115,8 +116,9 @@ df2 <- melt(water_budget[,c("Sub_period",
       # geom_line() +
       labs(x = "Sub-period",
            y = "??mm",
-           title = "Change in Rasponi Water Budget") +
-      scale_fill_brewer(palette="Reds") +
+           title = "Change in Rasponi Water Budget", 
+           tag = "b") +
+      scale_fill_brewer(palette="Set1") +
       theme_cowplot() +
       annotate(geom = "text", 
            x = c(1,2,3, 4, 5),  
@@ -166,8 +168,9 @@ df3 <- melt(water_budget[,c("Sub_period",
       # geom_line() +
       labs(x = "Sub-period",
            y = "??mm",
-           title = "Change in Quinto Water Budget") +
-      scale_fill_brewer(palette="Reds") +
+           title = "Change in Quinto Water Budget", 
+           tag = "c") +
+      scale_fill_brewer(palette="Set1") +
       theme_cowplot() +
       annotate(geom = "text", 
            x = c(1,2,3, 4, 5),  
